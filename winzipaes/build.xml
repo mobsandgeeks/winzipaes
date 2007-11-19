@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<project name="zipaes" default="archive">
+
+	<target name="archive">
+		<zip
+	  	destfile="zipaes.zip"
+	  	basedir="C:/data/projects/zipaes/src"
+	  	includes="**/*"
+	  	excludes="**/.svn/*"/>
+	</target>
+
+</project>
