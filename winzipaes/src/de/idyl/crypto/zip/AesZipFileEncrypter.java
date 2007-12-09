@@ -68,6 +68,7 @@ public class AesZipFileEncrypter {
 		}
 	}
 
+	/** TODO - zipEntry might use extended local header */
 	protected void add( ZipEntry zipEntry, ZipFileEntryInputStream zipData, String password ) throws IOException, UnsupportedEncodingException {
 		AESEncrypter aesEncrypter = new AESEncrypterBC( password.getBytes("iso-8859-1") );
 
