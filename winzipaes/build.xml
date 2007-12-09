@@ -4,8 +4,8 @@
 	<target name="archive">
 		<zip
 	  	destfile="zipaes.zip"
-	  	basedir="C:/data/projects/zipaes/src"
-	  	includes="**/*"
+	  	basedir="C:/data/projects/zipaes"
+	  	includes="src/**/*, src.test/**/*"
 	  	excludes="**/.svn/*"/>
 	</target>
 
