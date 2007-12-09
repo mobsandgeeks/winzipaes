@@ -5,7 +5,8 @@ import java.util.Date;
 import java.util.zip.ZipEntry;
 
 /**
- * information about one zip entry that is written to the encrypted zip archive
+ * information about one zip entry that is written
+ * to an encrypted zip archive or read from one
  *
  * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
  */
@@ -28,10 +29,10 @@ public class ExtZipEntry extends ZipEntry {
 	public void initEncryptedEntry() {
 		setCrc( 0 );	// CRC-32 / for encrypted files it's 0 as AES/MAC checks integritiy
 
-		flag |= 1;  // bit0 - encrypted
+		this.flag |= 1;  // bit0 - encrypted
     //flag |= 8;  // bit3 - use data descriptor
 
-		primaryCompressionMethod = 0x63;
+		this.primaryCompressionMethod = 0x63;
 
 		byte[] extraBytes = new byte[11];
 		extraBytes = new byte[11];
