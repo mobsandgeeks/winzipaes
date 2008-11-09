@@ -15,6 +15,10 @@ import de.idyl.crypto.zip.impl.ExtZipEntry;
 
 public class TestAesZipFileEncrypter extends TestCase {
 
+	static {
+		System.setProperty("java.util.logging.config.file", "logging.properties");
+	}
+
 	protected void addZipEntry( String name, String content, ZipOutputStream zout ) throws IOException {
 		ZipEntry ze = new ZipEntry(name);
 		ze.setTime((new Date()).getTime());
@@ -23,39 +27,42 @@ public class TestAesZipFileEncrypter extends TestCase {
 		zout.closeEntry();
 	}
 
-	public void testTwoFilesInZipFile() throws Exception {
-		System.setProperty("java.util.logging.config.file", "logging.properties");
-
-		String tempFileName = "c:\\tmp\\temp.zip";
+	protected void checkZipEntry( AesZipFileDecrypter aesDecryptor, String fileName, String fileContent, String password ) throws Exception {
+		ExtZipEntry entry = aesDecryptor.getEntry(fileName);		
+		File decFile = File.createTempFile("decFile", ".txt");		
+		aesDecryptor.extractEntry(entry, decFile, password);
+		BufferedReader fr = new BufferedReader( new FileReader(decFile) );
+		String line = fr.readLine();
+		assertEquals( fileContent, line );
+	}
+	
+	public void testFilesInZipFile() throws Exception {
 		String fileName1 = "file1.txt";
-		String fileContnt1 = "file1file1file1file1file1file1file1file1file1file1file1file1file1";
+		String fileContent1 = "file1file1file1file1file1";
 		String fileName2 = "file2.txt";
-		String fileContnt2 = "file2file2file2file2file2file2file2file2file2file2file2file2file2file2file2";
-		String fileName3 = "file3.txt";
-		String fileContnt3 = "file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3";
+		String fileContent2 = "file2file2file2file2file2file2file2file2file2";
+		String fileName3 = "foo\\file3.txt";
+		String fileContent3 = "file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3";
 
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tempFileName));
+		File tmpFile = File.createTempFile("tmpFile", ".zip");
+		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmpFile));
 		zout.setLevel(Deflater.BEST_COMPRESSION);
-		addZipEntry(fileName1, fileContnt1, zout);
-		addZipEntry(fileName2, fileContnt2, zout);
-		addZipEntry(fileName3, fileContnt3, zout);
+		addZipEntry(fileName1, fileContent1, zout);
+		addZipEntry(fileName2, fileContent2, zout);
+		addZipEntry(fileName3, fileContent3, zout);
 		zout.flush();
 		zout.finish();
 		zout.close();
 
 		String password = "123456";
-		String aesFileName = "c:\\tmp\\aes.zip";
-		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFileName);
-		aesEncryptor.addEncrypted(new File(tempFileName), password);
+		File aesFile = File.createTempFile("aesFile", ".zip");
+		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
+		aesEncryptor.addEncrypted(tmpFile, password);
 
-		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(new File(aesFileName));
-		ExtZipEntry entry = aesDecryptor.getEntry(fileName3);
-		String decryptedFileName = "C:/tmp/file3decrypted.zip";
-		aesDecryptor.extractEntry(entry, new File(decryptedFileName),password);
-		
-		BufferedReader fr = new BufferedReader( new FileReader(decryptedFileName) );
-		String line = fr.readLine();
-		assertEquals( fileContnt3, line );
+		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
+		checkZipEntry( aesDecryptor, fileName1, fileContent1, password );
+		checkZipEntry( aesDecryptor, fileName2, fileContent2, password );
+		checkZipEntry( aesDecryptor, fileName3, fileContent3, password );		
 	}
 
 }
