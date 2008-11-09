@@ -38,12 +38,20 @@ public class AesZipFileEncrypter {
 
 	/**
 	 *
-	 * @param pathName to output zip file
+	 * @param pathName to output zip file (aes encrypted zip file)
 	 */
 	public AesZipFileEncrypter( String pathName ) throws IOException {
 		zipOS = new ExtZipOutputStream( new File(pathName) );
 	}
 
+	/**
+	 * 
+	 * @param outFile output file (aes encrypted zip file)
+	 */
+	public AesZipFileEncrypter( File outFile ) throws IOException {
+		zipOS = new ExtZipOutputStream( outFile );
+	}
+	
   // --------------------------------------------------------------------------
 
   protected void add( ZipFile inFile, String password ) throws IOException, UnsupportedEncodingException {
