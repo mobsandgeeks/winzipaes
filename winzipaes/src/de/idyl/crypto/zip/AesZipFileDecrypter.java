@@ -134,6 +134,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 			// create tmp file to contains the decrypted, but still compressed data
 			File tmpFile = new File( outFile.getPath() + "_TMP.zip" );
+			makeDir( new File(tmpFile.getParent()) );
 			ExtZipOutputStream zos = new ExtZipOutputStream( tmpFile );
 			ExtZipEntry tmpEntry = new ExtZipEntry( zipEntry );
 			tmpEntry.setMethod( ZipEntry.DEFLATED );
@@ -187,6 +188,20 @@ public class AesZipFileDecrypter implements ZipConstants {
 		return raFile.readShort( this.dirOffsetPos-6 );
 	}
 
+	protected static void makeDir(File dir) {
+	  if( dir!=null ) { 
+	    if( !dir.exists() ) {
+	    	if( dir.getParent()!=null ) {
+		      File parentDir = new File(dir.getParent());
+		      if( !parentDir.exists() ) {
+		      	makeDir(parentDir);
+		      }
+	    	}
+	      dir.mkdir();
+	    }
+	  }
+	}
+	
 	// --------------------------------------------------------------------------
 
   /** testcode + usage example */

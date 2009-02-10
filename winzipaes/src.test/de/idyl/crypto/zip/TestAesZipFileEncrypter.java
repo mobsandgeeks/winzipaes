@@ -58,11 +58,15 @@ public class TestAesZipFileEncrypter extends TestCase {
 		File aesFile = File.createTempFile("aesFile", ".zip");
 		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
 		aesEncryptor.addEncrypted(tmpFile, password);
-
+		
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
+		
 		checkZipEntry( aesDecryptor, fileName1, fileContent1, password );
 		checkZipEntry( aesDecryptor, fileName2, fileContent2, password );
-		checkZipEntry( aesDecryptor, fileName3, fileContent3, password );		
+		checkZipEntry( aesDecryptor, fileName3, fileContent3, password );
+		
+		ExtZipEntry entry = aesDecryptor.getEntry(fileName3);		
+		aesDecryptor.extractEntry( entry, new File(entry.getName()), password);		
 	}
 
 }
