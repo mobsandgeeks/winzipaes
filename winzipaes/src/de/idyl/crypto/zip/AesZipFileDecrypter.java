@@ -75,6 +75,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 			}
 
 			short fileNameLength = raFile.readShort( fileOffset + 28 );
+			short extraFieldLength = raFile.readShort( fileOffset + 30 );
 			long fileOffsetPos = fileOffset + 28 + 14;
 			long fileDataOffset = raFile.readInt( fileOffsetPos );
 			int locsig = raFile.readInt( fileDataOffset );
@@ -104,7 +105,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 			}
 
 			if( zipEntry.isEncrypted() ) {
-				nextFileOffset += zipEntry.getExtra().length;
+				nextFileOffset += extraFieldLength;
 			}
 
 			out.add(zipEntry);
