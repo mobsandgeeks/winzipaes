@@ -27,7 +27,8 @@ public class TestAesZipFileEncrypter extends TestCase {
 		zout.closeEntry();
 	}
 
-	protected void checkZipEntry( AesZipFileDecrypter aesDecryptor, String fileName, String fileContent, String password ) throws Exception {
+	/** only checks for first line in file... */
+	public static void checkZipEntry( AesZipFileDecrypter aesDecryptor, String fileName, String fileContent, String password ) throws Exception {
 		ExtZipEntry entry = aesDecryptor.getEntry(fileName);		
 		File decFile = File.createTempFile("decFile", ".txt");		
 		aesDecryptor.extractEntry(entry, decFile, password);
