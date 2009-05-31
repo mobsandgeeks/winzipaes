@@ -4,7 +4,7 @@
 	<target name="archive">
 		<zip
 	  	destfile="zipaes.zip"
-	  	basedir="C:/data/projects/zipaes"
+	  	basedir="C:/data/projects/winzipaesGoogleCode/winzipaes"
 	  	includes="src/**/*, src.test/**/*"
 	  	excludes="**/.svn/*"/>
 	</target>
