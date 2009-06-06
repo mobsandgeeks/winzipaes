@@ -1,0 +1,1 @@
+this is the directory, you want to checkout as a Java-Eclipse-Project using svn
