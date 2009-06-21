@@ -1,8 +1,8 @@
 package de.idyl.crypto.zip.impl;
 
-import static de.idyl.crypto.zip.impl.ByteArrayHelper.byteArrayToInt;
-import static de.idyl.crypto.zip.impl.ByteArrayHelper.byteArrayToLong;
-import static de.idyl.crypto.zip.impl.ByteArrayHelper.byteArrayToShort;
+import static de.idyl.crypto.zip.impl.ByteArrayHelper.toInt;
+import static de.idyl.crypto.zip.impl.ByteArrayHelper.toLong;
+import static de.idyl.crypto.zip.impl.ByteArrayHelper.toShort;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +42,7 @@ public class ExtRandomAccessFile {
   public long readLong() throws IOException {
   	byte[] b = new byte[ 8 ];
   	file.read( b, 0, 8 );
-  	long out = byteArrayToLong( b );
+  	long out = toLong( b );
   	return out;
   }
 
@@ -54,7 +54,7 @@ public class ExtRandomAccessFile {
   public int readInt() throws IOException {
   	byte[] b = new byte[ 4 ];
   	file.read( b, 0, 4 );
-  	int out = byteArrayToInt( b );
+  	int out = toInt( b );
   	return out;
   }
 
@@ -66,7 +66,7 @@ public class ExtRandomAccessFile {
   public short readShort() throws IOException {
   	byte[] b = new byte[ 2 ];
   	file.read( b, 0, 2 );
-  	short out = byteArrayToShort( b );
+  	short out = toShort( b );
   	return out;
   }
 

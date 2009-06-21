@@ -87,7 +87,7 @@ public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
 	 */
 	protected void encryptBlock( byte[] in, int pos, int length ) {
 		byte[] encryptedIn = new byte[blockSize];
-		byte[] ivBytes = ByteArrayHelper.intToByteArray( nonce++, 16 );
+		byte[] ivBytes = ByteArrayHelper.toByteArray( nonce++, 16 );
 		ParametersWithIV ivParams = new ParametersWithIV(cipherParameters, ivBytes);
 		aesCipher.init( true, ivParams );
 

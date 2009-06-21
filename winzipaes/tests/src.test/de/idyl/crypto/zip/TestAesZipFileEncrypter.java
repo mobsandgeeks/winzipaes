@@ -1,5 +1,7 @@
 package de.idyl.crypto.zip;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,10 +13,11 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
 import de.idyl.crypto.zip.impl.ExtZipEntry;
 
-public class TestAesZipFileEncrypter extends TestCase {
+public class TestAesZipFileEncrypter {
 
 	static {
 		System.setProperty("java.util.logging.config.file", "logging.properties");
@@ -41,6 +44,7 @@ public class TestAesZipFileEncrypter extends TestCase {
 		assertEquals( fileContent, line );
 	}
 	
+	@Test
 	public void testFilesInZipFile() throws Exception {
 		String fileName1 = "file1.txt";
 		String fileContent1 = "file1file1file1file1file1";
