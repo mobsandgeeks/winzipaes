@@ -7,7 +7,7 @@ package de.idyl.crypto.zip.impl;
  */
 public class ByteArrayHelper {
 
-  public static long byteArrayToLong(byte[] in) {
+  public static long toLong(byte[] in) {
     long out = 0;
     for( int i=in.length-1; i>0; i-- ) {
       out |= in[i] & 0xff;
@@ -17,17 +17,17 @@ public class ByteArrayHelper {
     return out;
   }
 
-  public static int byteArrayToInt(byte[] in) {
+  public static int toInt(byte[] in) {
     int out = 0;
     for( int i=in.length-1; i>0; i-- ) {
-      out |= (int)(in[i] & 0xff);
+      out |= in[i] & 0xff;
       out <<= 8;
     }
     out |= in[0] & 0xff;
     return out;
   }
 
-  public static short byteArrayToShort(byte[] in) {
+  public static short toShort(byte[] in) {
     short out = 0;
     for( int i=in.length-1; i>0; i-- ) {
       out |= in[i] & 0xff;
@@ -37,7 +37,7 @@ public class ByteArrayHelper {
     return out;
   }
 
-	public static byte[] intToByteArray(int in) {
+	public static byte[] toByteArray(int in) {
 		byte[] out = new byte[4];
 
 		out[0] = (byte)in;
@@ -48,9 +48,9 @@ public class ByteArrayHelper {
 		return out;
 	}
 
-	public static byte[] intToByteArray(int in,int outSize) {
+	public static byte[] toByteArray(int in,int outSize) {
 		byte[] out = new byte[outSize];
-		byte[] intArray = intToByteArray(in);
+		byte[] intArray = toByteArray(in);
 		for( int i=0; i<intArray.length && i<outSize; i++ ) {
 			out[i] = intArray[i];
 		}

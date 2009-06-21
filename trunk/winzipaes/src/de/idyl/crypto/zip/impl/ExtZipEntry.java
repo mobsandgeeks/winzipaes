@@ -7,7 +7,7 @@ import java.util.zip.ZipEntry;
 /**
  * information about one zip entry that is written
  * to an encrypted zip archive or read from one
- *
+ * 
  * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
  */
 public class ExtZipEntry extends ZipEntry {
@@ -116,12 +116,17 @@ public class ExtZipEntry extends ZipEntry {
 
   // --------------------------------------------------------------------------
 
+	/**
+	 * ZipEntry (my superclass) uses dosTime internally. On getTime() you get
+	 * a java time based long value. This method provides the DOS value that
+	 * is stored in the zip file.
+	 */
   public long getDosTime() {
     return javaToDosTime( getTime() );
   }
 
-  protected static long javaToDosTime(long time) {
-    Date d = new Date(time);
+  public static long javaToDosTime(long javaTime) {
+    Date d = new Date(javaTime);
     Calendar ca = Calendar.getInstance();
     ca.setTime( d );
     int year = ca.get( Calendar.YEAR );
@@ -136,4 +141,15 @@ public class ExtZipEntry extends ZipEntry {
         | ca.get(Calendar.SECOND) >> 1;
   }
 
+  public static long dosToJavaTime(long dosTime) {
+    Calendar ca = Calendar.getInstance();
+    ca.set(Calendar.YEAR, (int)((dosTime >> 25) & 0x7f) + 1980);
+    ca.set(Calendar.MONTH, (int)((dosTime >> 21) & 0x0f) - 1);
+    ca.set(Calendar.DATE, (int)(dosTime >> 16) & 0x1f);
+    ca.set(Calendar.HOUR_OF_DAY, (int)(dosTime >> 11) & 0x1f);
+    ca.set(Calendar.MINUTE, (int)(dosTime >> 5) & 0x3f);
+    ca.set(Calendar.SECOND, (int)(dosTime << 1) & 0x3e);
+    return ca.getTime().getTime();
+  }
+  
 }

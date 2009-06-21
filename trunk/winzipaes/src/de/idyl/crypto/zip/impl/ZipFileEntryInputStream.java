@@ -68,10 +68,10 @@ public class ZipFileEntryInputStream extends FileInputStream implements ZipConst
 
 		byte[] shortBuffer = new byte[2];
 		super.read(shortBuffer);
-		int fileNameLength = ByteArrayHelper.byteArrayToInt(shortBuffer);
+		int fileNameLength = ByteArrayHelper.toInt(shortBuffer);
 
 		super.read(shortBuffer);
-		int extraFieldLength = ByteArrayHelper.byteArrayToInt(shortBuffer);
+		int extraFieldLength = ByteArrayHelper.toInt(shortBuffer);
 
 		startPos = 18 + 12 + fileNameLength + extraFieldLength + dataDescriptorLength;
 		currentPos = startPos;

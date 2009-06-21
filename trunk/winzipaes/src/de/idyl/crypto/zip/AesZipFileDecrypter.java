@@ -73,7 +73,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 			if( censig!=CENSIG ) {
 				throw new ZipException("expected CENSIC not found at entry no " + (i+1) + " in central directory at end of zip file");
 			}
-
+			
 			short fileNameLength = raFile.readShort( fileOffset + 28 );
 			short extraFieldLength = raFile.readShort( fileOffset + 30 );
 			long fileOffsetPos = fileOffset + 28 + 14;
@@ -95,8 +95,12 @@ public class AesZipFileDecrypter implements ZipConstants {
 			zipEntry.setOffset( (int)fileDataOffset );
 			zipEntry.setCompressedSize( raFile.readInt( fileOffset + 20 ) );
 			zipEntry.setSize( raFile.readInt( fileOffset + 24 ) );
-			zipEntry.setTime( System.currentTimeMillis() );
-			zipEntry.setTime( raFile.readInt( fileOffset + 12 ) );
+
+			long dosTime = raFile.readInt( fileOffset + 12 );
+			zipEntry.setTime( ExtZipEntry.dosToJavaTime(dosTime) );
+			
+			// TODO - check AES extra data field, offset 9, bytes 2 (see aes_info.htm)
+			// this works until a file is exceptionally small
 			zipEntry.setMethod( ZipEntry.DEFLATED );
 			if( isEncrypted ) {
 				zipEntry.initEncryptedEntry();
