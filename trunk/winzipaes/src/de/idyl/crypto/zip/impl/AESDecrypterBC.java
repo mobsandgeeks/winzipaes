@@ -41,7 +41,7 @@ public class AESDecrypterBC extends AESCryptoBase implements AESDecrypter {
 		System.arraycopy( keyBytes, KEY_SIZE_BYTE*2, this.pwVerificationBytes, 0, 2 );
 
 		if( !ByteArrayHelper.isEqual( this.pwVerificationBytes, pwVerification ) ) {
-			throw new ZipException("wrong password");
+			throw new ZipException("wrong password - " + ByteArrayHelper.toString(this.pwVerificationBytes) + "/ " + ByteArrayHelper.toString(pwVerification));
 		}
 
 		// create the first 16 bytes of the key sequence again (using pw+salt)
