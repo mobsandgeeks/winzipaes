@@ -58,11 +58,15 @@ public class ByteArrayHelper {
 	}
 
 	public static String toString( byte[] theByteArray ){
-		StringBuffer theResult = new StringBuffer();
+		StringBuffer out = new StringBuffer();
 		for( int i=0; i<theByteArray.length; i++ ) {
-			theResult.append( Integer.toHexString(theByteArray[i]&0xff) ).append(' ');
+			String s = Integer.toHexString(theByteArray[i]&0xff);
+			if( s.length()<2 ) {
+				out.append( '0' );
+			}
+			out.append( s ).append(' ');
 		}
-		return theResult.toString();
+		return out.toString();
 	}
 
 	public static boolean isEqual( byte[] first, byte[] second ) {

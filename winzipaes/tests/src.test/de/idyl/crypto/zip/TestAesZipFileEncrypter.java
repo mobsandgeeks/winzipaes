@@ -37,11 +37,12 @@ public class TestAesZipFileEncrypter {
 		if( entry==null ) {
 			throw new FileNotFoundException( fileName );
 		}
-		File decFile = File.createTempFile("decFile", ".txt");		
+		File decFile = new File(TestAesZipFileDecrypter.TEST_PATH + "extractedFile.txt");		
 		aesDecryptor.extractEntry(entry, decFile, password);
 		BufferedReader fr = new BufferedReader( new FileReader(decFile) );
 		String line = fr.readLine();
 		assertEquals( fileContent, line );
+		decFile.delete();
 	}
 	
 	@Test
@@ -53,7 +54,7 @@ public class TestAesZipFileEncrypter {
 		String fileName3 = "foo\\file3.txt";
 		String fileContent3 = "file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3";
 
-		File tmpFile = File.createTempFile("tmpFile", ".zip");
+		File tmpFile = new File(TestAesZipFileDecrypter.TEST_PATH + "tmpFile.zip");
 		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmpFile));
 		zout.setLevel(Deflater.BEST_COMPRESSION);
 		addZipEntry(fileName1, fileContent1, zout);
@@ -64,18 +65,23 @@ public class TestAesZipFileEncrypter {
 		zout.close();
 
 		String password = "123456";
-		File aesFile = File.createTempFile("aesFile", ".zip");
+		File aesFile = new File(TestAesZipFileDecrypter.TEST_PATH + "aesFile.zip");
 		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
 		aesEncryptor.addEncrypted(tmpFile, password);
 		
-		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
+		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile);
 		
-		checkZipEntry( aesDecryptor, fileName1, fileContent1, password );
-		checkZipEntry( aesDecryptor, fileName2, fileContent2, password );
-		checkZipEntry( aesDecryptor, fileName3, fileContent3, password );
+		checkZipEntry( aesDecrypter, fileName1, fileContent1, password );
+		checkZipEntry( aesDecrypter, fileName2, fileContent2, password );
+		checkZipEntry( aesDecrypter, fileName3, fileContent3, password );
 		
-		ExtZipEntry entry = aesDecryptor.getEntry(fileName3);		
-		aesDecryptor.extractEntry( entry, new File(entry.getName()), password);		
+		ExtZipEntry entry = aesDecrypter.getEntry(fileName3);
+		File extractedFile = new File(entry.getName()); 
+		aesDecrypter.extractEntry( entry, extractedFile, password);
+		aesDecrypter.close();
+		
+		aesFile.delete();
+		tmpFile.delete();
 	}
 
 }

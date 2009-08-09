@@ -16,6 +16,8 @@ import java.util.zip.ZipFile;
 
 import de.idyl.crypto.zip.impl.AESDecrypter;
 import de.idyl.crypto.zip.impl.AESDecrypterBC;
+import de.idyl.crypto.zip.impl.ByteArrayHelper;
+import de.idyl.crypto.zip.impl.CentralDirectoryEntry;
 import de.idyl.crypto.zip.impl.ExtRandomAccessFile;
 import de.idyl.crypto.zip.impl.ExtZipEntry;
 import de.idyl.crypto.zip.impl.ExtZipOutputStream;
@@ -37,7 +39,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 	// --------------------------------------------------------------------------
 
 	/** charset to use for filename(s) and password - defaults to iso-8859-1 */
-	protected static String charset = "iso-8859-1";
+	public static String charset = "iso-8859-1";
 
 	/** size of buffer to use for byte[] operations - defaults to 1024 */
 	protected static int bufferSize = 1024 * 10;
@@ -50,9 +52,12 @@ public class AesZipFileDecrypter implements ZipConstants {
 	/** where does the directory (after file data) start? */
 	protected long dirOffsetPos;
 
+	protected File zipFile;
+	
 	public AesZipFileDecrypter( File zipFile ) throws IOException {
-		raFile = new ExtRandomAccessFile( zipFile );
-		dirOffsetPos = zipFile.length() - 6;
+		this.zipFile = zipFile;
+		this.raFile = new ExtRandomAccessFile( zipFile );
+		this.dirOffsetPos = zipFile.length() - 6;
 	}
 
 	public void close() throws IOException {
@@ -85,26 +90,24 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 			byte[] fileNameBytes = raFile.readByteArray( fileOffsetPos+4, fileNameLength );
 			long nextFileOffset = raFile.getFilePointer();
-
 			String fileName = new String( fileNameBytes, charset );
 
-			short flag = raFile.readShort( fileOffset + 8 );
-			boolean isEncrypted = (flag&1)>0;
-
 			ExtZipEntry zipEntry = new ExtZipEntry( fileName );
-			zipEntry.setOffset( (int)fileDataOffset );
-			zipEntry.setCompressedSize( raFile.readInt( fileOffset + 20 ) );
-			zipEntry.setSize( raFile.readInt( fileOffset + 24 ) );
+			CentralDirectoryEntry cde = new CentralDirectoryEntry( raFile, fileOffset );
+			zipEntry.setCentralDirectoryEntry( cde );
+
+			zipEntry.setCompressedSize( cde.getCompressedSize() );
+			zipEntry.setSize( cde.getUncompressedSize() );
 
 			long dosTime = raFile.readInt( fileOffset + 12 );
 			zipEntry.setTime( ExtZipEntry.dosToJavaTime(dosTime) );
 			
-			// TODO - check AES extra data field, offset 9, bytes 2 (see aes_info.htm)
-			// this works until a file is exceptionally small
-			zipEntry.setMethod( ZipEntry.DEFLATED );
-			if( isEncrypted ) {
+			if( cde.isEncrypted() ) {
+				zipEntry.setMethod( cde.getActualCompressionMethod() );
+				zipEntry.setOffset( (int)(cde.getLocalHeaderOffset() + cde.getLocalHeaderSize()) + cde.getCryptoHeaderLength() );
 				zipEntry.initEncryptedEntry();
 			} else {
+				zipEntry.setMethod( ZipEntry.DEFLATED );
 				zipEntry.setPrimaryCompressionMethod( ZipEntry.DEFLATED );
 			}
 
@@ -130,26 +133,39 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 	public void extractEntry( ExtZipEntry zipEntry, File outFile, String password ) throws IOException, ZipException, DataFormatException {
 		if( zipEntry.isEncrypted() ) {
-			int dataStart = zipEntry.getOffset() + 4 + 26 + zipEntry.getName().length() + zipEntry.getExtra().length;
-			byte[] salt = raFile.readByteArray( dataStart, 16 );
-			byte[] pwVerification = raFile.readByteArray( dataStart+16, 2 );
+			byte[] pwBytes = password.getBytes(charset);
+			
+			CentralDirectoryEntry cde = zipEntry.getCentralDirectoryEntry();
+			int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
+			
+			byte[] salt = raFile.readByteArray( cryptoHeaderOffset, 16 );
+			byte[] pwVerification = raFile.readByteArray( cryptoHeaderOffset+16, 2 );
 
+			if( LOG.isLoggable(Level.FINEST) ) {
+				LOG.finest( "\n" + cde.toString() );
+				LOG.finest( "offset    = " + zipEntry.getOffset() );
+				LOG.finest( "cryptoOff = " + cryptoHeaderOffset );
+				LOG.finest( "pwBytes   = " + ByteArrayHelper.toString(pwBytes) + " - " + pwBytes.length );
+				LOG.finest( "salt      = " + ByteArrayHelper.toString(salt) + " - " + salt.length );
+				LOG.finest( "pwVerif   = " + ByteArrayHelper.toString(pwVerification) + " - " + pwVerification.length );
+			}
+			
 			// encrypter throws ZipException for wrong password
-			AESDecrypter decrypter = new AESDecrypterBC( password.getBytes(charset), salt, pwVerification );
+			AESDecrypter decrypter = new AESDecrypterBC( pwBytes, salt, pwVerification );
 
 			// create tmp file to contains the decrypted, but still compressed data
 			File tmpFile = new File( outFile.getPath() + "_TMP.zip" );
 			makeDir( new File(tmpFile.getParent()) );
 			ExtZipOutputStream zos = new ExtZipOutputStream( tmpFile );
 			ExtZipEntry tmpEntry = new ExtZipEntry( zipEntry );
-			tmpEntry.setMethod( ZipEntry.DEFLATED );
-			tmpEntry.setPrimaryCompressionMethod( ZipEntry.DEFLATED );
+			tmpEntry.setPrimaryCompressionMethod( zipEntry.getMethod() );
 			zos.putNextEntry( tmpEntry );
 
 			byte[] buffer = new byte[bufferSize];
 			int remaining = (int)zipEntry.getEncryptedDataSize();
 			while( remaining>0 ) {
 				int len = (remaining>buffer.length) ? buffer.length : remaining;
+				raFile.seek( cde.getOffset() );
 				int read = raFile.readByteArray(buffer,len);
 				decrypter.decrypt( buffer, read );
 				zos.writeBytes( buffer, 0, read );
@@ -164,7 +180,6 @@ public class AesZipFileDecrypter implements ZipConstants {
 				LOG.fine(	"storedMac=" + Arrays.toString(storedMac) );
 				LOG.fine(	"calcMac=" + Arrays.toString(calcMac) );
 			}
-
 			if( !Arrays.equals(storedMac, calcMac ) ) {
 				throw new ZipException("stored authentication (mac) value does not match calculated one");
 			}
@@ -172,7 +187,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 			ZipFile zf = new ZipFile( tmpFile );
 			ZipEntry ze = zf.entries().nextElement();
 			InputStream is = zf.getInputStream( ze );
-	    FileOutputStream fos = new FileOutputStream ( outFile.getPath() );
+			FileOutputStream fos = new FileOutputStream ( outFile.getPath() );
 			int read = is.read( buffer );
 			while( read>0 ) {
 				fos.write( buffer, 0, read );
