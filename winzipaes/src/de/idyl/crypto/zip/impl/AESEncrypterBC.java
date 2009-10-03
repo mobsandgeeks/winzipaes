@@ -1,6 +1,8 @@
 package de.idyl.crypto.zip.impl;
 
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipException;
 
 import org.bouncycastle.crypto.CipherParameters;
@@ -24,6 +26,10 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
  */
 public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
+
+	private static final Logger LOG = Logger.getLogger( AESEncrypterBC.class.getName() );
+
+	// --------------------------------------------------------------------------
 
 	protected CipherParameters cipherParameters;
 
@@ -68,6 +74,12 @@ public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
 
 		// incremented on each 16 byte block and used as encryption NONCE (ivBytes)
 		nonce = 1;
+		
+		if( LOG.isLoggable(Level.FINEST) ) {
+			LOG.finest( "pwBytes   = " + ByteArrayHelper.toString(pwBytes) + " - " + pwBytes.length );
+			LOG.finest( "salt      = " + ByteArrayHelper.toString(saltBytes) + " - " + saltBytes.length );
+			LOG.finest( "pwVerif   = " + ByteArrayHelper.toString(pwVerificationBytes) + " - " + pwVerificationBytes.length );
+		}
 	}
 
 	/**
