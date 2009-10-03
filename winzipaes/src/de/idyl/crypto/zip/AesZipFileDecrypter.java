@@ -161,11 +161,11 @@ public class AesZipFileDecrypter implements ZipConstants {
 			tmpEntry.setPrimaryCompressionMethod( zipEntry.getMethod() );
 			zos.putNextEntry( tmpEntry );
 
+			raFile.seek( cde.getOffset() );
 			byte[] buffer = new byte[bufferSize];
 			int remaining = (int)zipEntry.getEncryptedDataSize();
 			while( remaining>0 ) {
 				int len = (remaining>buffer.length) ? buffer.length : remaining;
-				raFile.seek( cde.getOffset() );
 				int read = raFile.readByteArray(buffer,len);
 				decrypter.decrypt( buffer, read );
 				zos.writeBytes( buffer, 0, read );
