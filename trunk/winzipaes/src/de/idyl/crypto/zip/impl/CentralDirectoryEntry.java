@@ -1,7 +1,11 @@
 package de.idyl.crypto.zip.impl;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipException;
+
+import org.omg.CORBA.ByteHolder;
 
 import de.idyl.crypto.zip.AesZipFileDecrypter;
 
@@ -33,6 +37,10 @@ import de.idyl.crypto.zip.AesZipFileDecrypter;
         file comment (variable size)			// 46 + fileNameLength + extraFieldLength
  */
 public class CentralDirectoryEntry implements ZipConstants {
+
+	private static final Logger LOG = Logger.getLogger( CentralDirectoryEntry.class.getName() );
+	
+	// ------------------------------------------------------------------------
 
 	protected ExtRandomAccessFile raFile;
 	
@@ -67,9 +75,12 @@ public class CentralDirectoryEntry implements ZipConstants {
 	}
 
 	protected void initFromRaFile() throws IOException {
+		// Central directory structure / central file header signature
 		int censig = raFile.readInt( fileOffset );
 		if( censig!=CENSIG ) {
 			throw new ZipException("expected CENSIC not found in central directory (at end of zip file)");
+		} else if( LOG.isLoggable(Level.FINE) ) {
+			LOG.fine( "found censigOffset=" + fileOffset );
 		}
 		
 		this.fileNameLength = raFile.readShort( fileOffset + 28 );
@@ -78,18 +89,30 @@ public class CentralDirectoryEntry implements ZipConstants {
 		
 		this.extraFieldOffset = this.fileOffset + 46 + this.fileNameLength;
 		this.extraFieldLength = raFile.readShort( fileOffset + 30 );
-
 		this.localHeaderOffset = raFile.readInt( fileOffset + 28 + 14 );
 
-		// TODO - check, why we have to use the local header instead of the CDE sometimes...
+		if( LOG.isLoggable(Level.FINE) ) {
+			LOG.fine( "CDS - extraFieldOffset =" + Long.toHexString(this.extraFieldOffset) );
+			LOG.fine( "CDS - extraFieldLength =" + this.extraFieldLength );
+			LOG.fine( "CDS - localHeaderOffset=" + Long.toHexString(this.localHeaderOffset) );
+		}
+		
+		// TODO - check, why we have to use the local header instead of the CDS sometimes...
 		
 		byte[] efhid = raFile.readByteArray( this.extraFieldOffset, 2 );
 		if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {
 			this.extraFieldOffset = localHeaderOffset+30+fileNameLength;
 			this.extraFieldLength = raFile.readShort( localHeaderOffset+28 );
+			if( LOG.isLoggable(Level.FINE) ) {
+				LOG.fine( "local header - extraFieldOffset=" + Long.toHexString(this.extraFieldOffset) );
+				LOG.fine( "local header - extraFieldLength=" + Long.toHexString(this.extraFieldLength) );
+			}
+			if( 0==extraFieldLength ) {
+				throw new ZipException("extra field is of length 0 - this is probably not a WinZip AES encrypted entry");
+			}
 			efhid = raFile.readByteArray( extraFieldOffset, 2);
 			if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {			
-				throw new ZipException("expected 'extra field header ID' (0x9901) not neither found in central directory nor local file header");
+				throw new ZipException("expected 'extra field header ID' (0x9901) neither found in central directory nor local file header");
 			}
 		}
 		
@@ -195,5 +218,5 @@ public class CentralDirectoryEntry implements ZipConstants {
 		}
 		return sb.toString();
 	}
-
+	
 }
