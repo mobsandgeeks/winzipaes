@@ -5,8 +5,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipException;
 
-import org.omg.CORBA.ByteHolder;
-
 import de.idyl.crypto.zip.AesZipFileDecrypter;
 
 /**
