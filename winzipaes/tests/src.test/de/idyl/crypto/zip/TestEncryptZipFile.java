@@ -17,7 +17,7 @@ public class TestEncryptZipFile {
 
 	public void testEncryptZipFile() throws Exception {
 		AesZipFileEncrypter enc = new AesZipFileEncrypter(ZIP_FILE_NAME);
-		enc.zipAndEcrypt(new File("tests/data/Charros.txt"), "moco");
+		enc.zipAndEncrypt(new File("tests/data/Charros.txt"), "moco");
 		
 		System.out.println("---success! ---");
 	}
