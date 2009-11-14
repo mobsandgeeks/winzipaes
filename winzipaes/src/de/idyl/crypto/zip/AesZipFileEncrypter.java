@@ -21,8 +21,7 @@ import de.idyl.crypto.zip.impl.ExtZipOutputStream;
 import de.idyl.crypto.zip.impl.ZipFileEntryInputStream;
 
 /**
- * Create ZIP-Outputstream containing entries from an existing ZIP-File, but AES
- * encrypted.
+ * Create ZIP-Outputstream containing entries from an existing ZIP-File, but AES encrypted.
  * 
  * TODO - support 128 + 192 keys
  * 
@@ -94,8 +93,8 @@ public class AesZipFileEncrypter {
 
 		zipOS.putNextEntry(entry);
 		/*
-		 * ZIP-file data contains: 1. salt 2. pwVerification 3. encryptedContent
-		 * 4. authenticationCode
+		 * ZIP-file data contains: 1. salt 2. pwVerification 3. encryptedContent 4.
+		 * authenticationCode
 		 */
 		zipOS.writeBytes(aesEncrypter.getSalt());
 		zipOS.writeBytes(aesEncrypter.getPwVerification());
@@ -136,18 +135,28 @@ public class AesZipFileEncrypter {
 		fin.close();
 	}
 
-	public void zipAndEcrypt(File pathToFile, String password) throws IOException {
+	// --------------------------------------------------------------------------
+
+	/**
+	 * add one file to encrypted zip file
+	 * 
+	 * @param pathToFile
+	 *            the file to add
+	 * @param password
+	 *            the password used for encryption
+	 * @throws IOException
+	 */
+	public void zipAndEncrypt(File pathToFile, String password) throws IOException {
 		File outZipFile = new File(pathToFile + ".zip");
 		zip(pathToFile, outZipFile);
 		addEncrypted(outZipFile, password);
 	}
 
 	/**
-	 * Take all elements from zipFile and add them ENCRYPTED with password to
-	 * the new zip file created with this instance. <br>
-	 * Encrypted data of each file has the same size as the compressed data,
-	 * though the file size is increased by 26 bytes for salt and
-	 * pw-verification bytes.
+	 * Take all elements from zipFile and add them ENCRYPTED with password to the new zip file
+	 * created with this instance. <br>
+	 * Encrypted data of each file has the same size as the compressed data, though the file size is
+	 * increased by 26 bytes for salt and pw-verification bytes.
 	 * 
 	 * @param pathToZipFile
 	 *            provides zipFileEntries for encryption
@@ -167,7 +176,7 @@ public class AesZipFileEncrypter {
 	/** testcode + usage example */
 	public static void main(String[] args) throws Exception {
 		AesZipFileEncrypter enc = new AesZipFileEncrypter("doc/zipSpecificationAes.zip");
-		enc.zipAndEcrypt(new File("doc/zipSpecification.txt"), "foo");
+		enc.zipAndEncrypt(new File("doc/zipSpecification.txt"), "foo");
 	}
 
 }
