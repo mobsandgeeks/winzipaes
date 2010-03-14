@@ -63,7 +63,7 @@ public class CentralDirectoryEntry implements ZipConstants {
 	protected int compressedSize;
 
 	protected int uncompressedSize;
-
+	
 	// ------------------------------------------------------------------------
 	
 	public CentralDirectoryEntry( ExtRandomAccessFile raFile, long fileOffset ) throws IOException {
@@ -80,6 +80,9 @@ public class CentralDirectoryEntry implements ZipConstants {
 		} else if( LOG.isLoggable(Level.FINE) ) {
 			LOG.fine( "found censigOffset=" + fileOffset );
 		}
+
+		short flag = raFile.readShort( fileOffset + 8 );
+		this.isEncrypted = (flag&1)>0;
 		
 		this.fileNameLength = raFile.readShort( fileOffset + 28 );
 		byte[] fileNameBytes = raFile.readByteArray( fileOffset + 46, fileNameLength );
@@ -96,34 +99,34 @@ public class CentralDirectoryEntry implements ZipConstants {
 		}
 		
 		// TODO - check, why we have to use the local header instead of the CDS sometimes...
-		
-		byte[] efhid = raFile.readByteArray( this.extraFieldOffset, 2 );
-		if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {
-			this.extraFieldOffset = localHeaderOffset+30+fileNameLength;
-			this.extraFieldLength = raFile.readShort( localHeaderOffset+28 );
-			if( LOG.isLoggable(Level.FINE) ) {
-				LOG.fine( "local header - extraFieldOffset=" + Long.toHexString(this.extraFieldOffset) );
-				LOG.fine( "local header - extraFieldLength=" + Long.toHexString(this.extraFieldLength) );
-			}
-			if( 0==extraFieldLength ) {
-				throw new ZipException("extra field is of length 0 - this is probably not a WinZip AES encrypted entry");
-			}
-			efhid = raFile.readByteArray( extraFieldOffset, 2);
-			if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {			
-				throw new ZipException("expected 'extra field header ID' (0x9901) neither found in central directory nor local file header");
-			}
-		}
-		
-		this.actualCompressionMethod = raFile.readShort( getExtraFieldOffset() + 9 );
 
-		this.localHeaderSize = 30 + getExtraFieldLength() + getFileNameLength();
+		if( this.isEncrypted ) {
+			byte[] efhid = raFile.readByteArray( this.extraFieldOffset, 2 );
+			if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {
+				this.extraFieldOffset = localHeaderOffset+30+fileNameLength;
+				this.extraFieldLength = raFile.readShort( localHeaderOffset+28 );
+				if( LOG.isLoggable(Level.FINE) ) {
+					LOG.fine( "local header - extraFieldOffset=" + Long.toHexString(this.extraFieldOffset) );
+					LOG.fine( "local header - extraFieldLength=" + Long.toHexString(this.extraFieldLength) );
+				}
+				if( 0==extraFieldLength ) {
+					throw new ZipException("extra field is of length 0 - this is probably not a WinZip AES encrypted entry");
+				}
+				efhid = raFile.readByteArray( extraFieldOffset, 2);
+				if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {			
+					throw new ZipException("expected 'extra field header ID' (0x9901) neither found in central directory nor local file header");
+				}
+			}
+			
+			this.actualCompressionMethod = raFile.readShort( getExtraFieldOffset() + 9 );			
+
+			this.localHeaderSize = 30 + getExtraFieldLength() + getFileNameLength();
+		}
 
 		this.compressedSize = raFile.readInt( fileOffset + 20 );
 
 		this.uncompressedSize = raFile.readInt( fileOffset + 24 );
 
-		short flag = raFile.readShort( fileOffset + 8 );
-		this.isEncrypted = (flag&1)>0;
 	}
 	
 	// ------------------------------------------------------------------------
