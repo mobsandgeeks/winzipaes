@@ -87,6 +87,10 @@ public class CentralDirectoryEntry implements ZipConstants {
 		this.fileNameLength = raFile.readShort( fileOffset + 28 );
 		byte[] fileNameBytes = raFile.readByteArray( fileOffset + 46, fileNameLength );
 		this.fileName = new String( fileNameBytes, AesZipFileDecrypter.charset );
+		if( LOG.isLoggable(Level.FINE) ) {
+			LOG.fine( "fileName = " + this.fileName );
+		}
+		
 		
 		this.extraFieldOffset = this.fileOffset + 46 + this.fileNameLength;
 		this.extraFieldLength = raFile.readShort( fileOffset + 30 );

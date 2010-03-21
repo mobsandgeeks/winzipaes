@@ -37,7 +37,7 @@ public class TestAesZipFileEncrypter {
 		if( entry==null ) {
 			throw new FileNotFoundException( fileName );
 		}
-		File decFile = new File(TestAesZipFileDecrypter.TEST_PATH + "extractedFile.txt");		
+		File decFile = new File(TestAesZipFileDecrypter.TEST_DATA_PATH + "extractedFile.txt");		
 		aesDecryptor.extractEntry(entry, decFile, password);
 		BufferedReader fr = new BufferedReader( new FileReader(decFile) );
 		String line = fr.readLine();
@@ -54,7 +54,7 @@ public class TestAesZipFileEncrypter {
 		String fileName3 = "foo\\file3.txt";
 		String fileContent3 = "file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3";
 
-		File tmpFile = new File(TestAesZipFileDecrypter.TEST_PATH + "tmpFile.zip");
+		File tmpFile = new File(TestAesZipFileDecrypter.TEST_DATA_PATH + "tmpFile.zip");
 		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmpFile));
 		zout.setLevel(Deflater.BEST_COMPRESSION);
 		addZipEntry(fileName1, fileContent1, zout);
@@ -65,7 +65,7 @@ public class TestAesZipFileEncrypter {
 		zout.close();
 
 		String password = "123456";
-		File aesFile = new File(TestAesZipFileDecrypter.TEST_PATH + "aesFile.zip");
+		File aesFile = new File(TestAesZipFileDecrypter.TEST_DATA_PATH + "aesFile.zip");
 		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
 		aesEncryptor.addEncrypted(tmpFile, password);
 		

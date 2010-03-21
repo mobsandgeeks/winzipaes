@@ -76,7 +76,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 		for( int i=0; i<totalNumberOfEntries; i++ ) {
 			int censig = raFile.readInt( fileOffset );
 			if( censig!=CENSIG ) {
-				throw new ZipException("expected CENSIC not found at entry no " + (i+1) + " in central directory at end of zip file");
+				throw new ZipException("expected CENSIC not found at entry no " + (i+1) + " in central directory at end of zip file at " + fileOffset);
 			}
 			
 			short fileNameLength = raFile.readShort( fileOffset + 28 );
@@ -85,14 +85,16 @@ public class AesZipFileDecrypter implements ZipConstants {
 			long fileDataOffset = raFile.readInt( fileOffsetPos );
 			int locsig = raFile.readInt( fileDataOffset );
 			if( locsig!=LOCSIG ) {
-				throw new ZipException("expected LOCSIC not found at alleged position of data for file no " + (i+1));
+				//throw new ZipException("expected LOCSIC not found at alleged position of data for file no " + (i+1));
+				System.out.println( fileOffsetPos + " - " + fileNameLength );
 			}
 
 			byte[] fileNameBytes = raFile.readByteArray( fileOffsetPos+4, fileNameLength );
 			long nextFileOffset = raFile.getFilePointer();
 			String fileName = new String( fileNameBytes, charset );
-
+			
 			ExtZipEntry zipEntry = new ExtZipEntry( fileName );
+
 			CentralDirectoryEntry cde = new CentralDirectoryEntry( raFile, fileOffset );
 			zipEntry.setCentralDirectoryEntry( cde );
 
@@ -111,11 +113,10 @@ public class AesZipFileDecrypter implements ZipConstants {
 				zipEntry.setPrimaryCompressionMethod( ZipEntry.DEFLATED );
 			}
 
-			if( zipEntry.isEncrypted() ) {
-				nextFileOffset += extraFieldLength;
-			}
+			nextFileOffset += extraFieldLength;
 
 			out.add(zipEntry);
+
 			fileOffset = nextFileOffset;
 		}
 
@@ -199,11 +200,11 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 			tmpFile.delete();
 		} else {
-			throw new ZipException( "currently only extracts encrypted files" );
+			throw new ZipException( "currently only extracts encrypted files - use java.util.zip to unzip" );
 		}
 	}
 
-	/** number of entries in file */
+	/** number of entries in file (files AND directories) */
 	public short getNumberOfEntries() throws IOException {
 		return raFile.readShort( this.dirOffsetPos-6 );
 	}
