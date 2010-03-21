@@ -80,7 +80,7 @@ General Format of a ZIP file
 
       File header:
 
-	central file header signature   4 bytes  (0x02014b50)
+	central file header signature   4 bytes  (0x02014b50)   CENSIG
 	version made by                 2 bytes
 	version needed to extract       2 bytes
 	general purpose bit flag        2 bytes
