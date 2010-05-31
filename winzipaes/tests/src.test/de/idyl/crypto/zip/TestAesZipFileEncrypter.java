@@ -38,7 +38,7 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		String fileContent1 = "file1file1file1file1file1";
 		String fileName2 = "file2.txt";
 		String fileContent2 = "file2file2file2file2file2file2file2file2file2";
-		String fileName3 = "foo\\file3.txt";
+		String fileName3 = "test\\out\\foo\\file3.txt";
 		String fileContent3 = "file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3";
 
 		File tmpZipFile = getOutFile("tmpFile.zip");
