@@ -1,2 +1,0 @@
-Test content.
-Password x123456789x
