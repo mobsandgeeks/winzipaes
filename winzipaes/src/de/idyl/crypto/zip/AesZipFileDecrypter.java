@@ -133,6 +133,9 @@ public class AesZipFileDecrypter implements ZipConstants {
 	}
 
 	public void extractEntry( ExtZipEntry zipEntry, File outFile, String password ) throws IOException, ZipException, DataFormatException {
+		if( zipEntry==null ) {
+			throw new ZipException("zipEntry must NOT be NULL");
+		}
 		if( zipEntry.isEncrypted() ) {
 			byte[] pwBytes = password.getBytes(charset);
 			

@@ -1,52 +1,39 @@
 package de.idyl.crypto.zip;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Date;
 import java.util.zip.Deflater;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
 import de.idyl.crypto.zip.impl.ExtZipEntry;
 
-public class TestAesZipFileEncrypter {
 
-	static {
-		System.setProperty("java.util.logging.config.file", "logging.properties");
-	}
+public class TestAesZipFileEncrypter extends TestAesZipBase {
 
-	protected void addZipEntry( String name, String content, ZipOutputStream zout ) throws IOException {
-		ZipEntry ze = new ZipEntry(name);
-		ze.setTime((new Date()).getTime());
-		zout.putNextEntry(ze);
-		zout.write(content.getBytes("iso-8859-1"));
-		zout.closeEntry();
-	}
-
-	/** only checks for first line in file... */
-	public static void checkZipEntry( AesZipFileDecrypter aesDecryptor, String fileName, String fileContent, String password ) throws Exception {
-		ExtZipEntry entry = aesDecryptor.getEntry(fileName);
-		if( entry==null ) {
-			throw new FileNotFoundException( fileName );
-		}
-		File decFile = new File(TestAesZipFileDecrypter.TEST_DATA_PATH + "extractedFile.txt");		
-		aesDecryptor.extractEntry(entry, decFile, password);
-		BufferedReader fr = new BufferedReader( new FileReader(decFile) );
-		String line = fr.readLine();
-		assertEquals( fileContent, line );
-		decFile.delete();
+	@Test
+	public void testVariousFileTypes() throws Exception {
+		String zipFileName = "tmpZipFile.zip";
+		File zipFile = getOutFile(zipFileName);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		enc.add(getInFile("jpgSmall.jpg"), PASSWORD);
+		enc.add(getInFile("textMedium.txt"), PASSWORD);
+		enc.add(getInFile("textLong.txt"), PASSWORD);
+		enc.close();
+		
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		File outFile = getOutFile("jpgSmall.jpg");
+		dec.extractEntry(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
+		outFile = getOutFile("textMedium.txt");
+		dec.extractEntry(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
+		outFile = getOutFile("textLong.txt");
+		dec.extractEntry(dec.getEntry("textLong.txt"), outFile, PASSWORD);
+		dec.close();
 	}
 	
 	@Test
-	public void testFilesInZipFile() throws Exception {
+	public void testMultipleFilesInZipFile() throws Exception {
 		String fileName1 = "file1.txt";
 		String fileContent1 = "file1file1file1file1file1";
 		String fileName2 = "file2.txt";
@@ -54,21 +41,21 @@ public class TestAesZipFileEncrypter {
 		String fileName3 = "foo\\file3.txt";
 		String fileContent3 = "file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3file3";
 
-		File tmpFile = new File(TestAesZipFileDecrypter.TEST_DATA_PATH + "tmpFile.zip");
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmpFile));
+		File tmpZipFile = getOutFile("tmpFile.zip");
+		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmpZipFile));
 		zout.setLevel(Deflater.BEST_COMPRESSION);
 		addZipEntry(fileName1, fileContent1, zout);
 		addZipEntry(fileName2, fileContent2, zout);
 		addZipEntry(fileName3, fileContent3, zout);
-		zout.flush();
-		zout.finish();
 		zout.close();
 
 		String password = "123456";
-		File aesFile = new File(TestAesZipFileDecrypter.TEST_DATA_PATH + "aesFile.zip");
+		File aesFile = getOutFile("aesFile.zip");
 		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
-		aesEncryptor.addEncrypted(tmpFile, password);
-		
+		aesEncryptor.addAll(tmpZipFile, password);
+		aesEncryptor.close();
+		tmpZipFile.delete();
+
 		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile);
 		
 		checkZipEntry( aesDecrypter, fileName1, fileContent1, password );
@@ -79,9 +66,6 @@ public class TestAesZipFileEncrypter {
 		File extractedFile = new File(entry.getName()); 
 		aesDecrypter.extractEntry( entry, extractedFile, password);
 		aesDecrypter.close();
-		
-		aesFile.delete();
-		tmpFile.delete();
 	}
-
+	
 }

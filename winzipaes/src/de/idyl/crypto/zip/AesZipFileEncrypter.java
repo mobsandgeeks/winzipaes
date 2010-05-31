@@ -21,7 +21,11 @@ import de.idyl.crypto.zip.impl.ExtZipOutputStream;
 import de.idyl.crypto.zip.impl.ZipFileEntryInputStream;
 
 /**
- * Create ZIP-Outputstream containing entries from an existing ZIP-File, but AES encrypted.
+ * Create ZIP archive containing AES-256 encrypted entries.
+ * <br>
+ * One instance of this class represents one encrypted ZIP file, that can recevie
+ * add() method calls that must be followed by one final call to close() to write
+ * the final archive part and close the output stream.
  * 
  * TODO - support 128 + 192 keys
  * 
@@ -146,11 +150,14 @@ public class AesZipFileEncrypter {
 	 *            the password used for encryption
 	 * @throws IOException
 	 */
-	public void zipAndEncrypt(File pathToFile, String password) throws IOException {
+	public void add(File pathToFile, String password) throws IOException {
 		File outZipFile = new File(pathToFile + ".zip");
 		zip(pathToFile, outZipFile);
-		addEncrypted(outZipFile, password);
+		addAll(outZipFile, password);
+		outZipFile.delete();
 	}
+
+	// --------------------------------------------------------------------------
 
 	/**
 	 * Take all elements from zipFile and add them ENCRYPTED with password to the new zip file
@@ -164,19 +171,31 @@ public class AesZipFileEncrypter {
 	 *            used to perform the encryption
 	 * @throws IOException
 	 */
-	public void addEncrypted(File pathToZipFile, String password) throws IOException {
+	public void addAll(File pathToZipFile, String password) throws IOException {
 		ZipFile zipFile = new ZipFile(pathToZipFile);
 		add(zipFile, password);
-		zipOS.finish();
 		zipFile.close();
 	}
 
 	// --------------------------------------------------------------------------
 
-	/** testcode + usage example */
-	public static void main(String[] args) throws Exception {
-		AesZipFileEncrypter enc = new AesZipFileEncrypter("doc/zipSpecificationAes.zip");
-		enc.zipAndEncrypt(new File("doc/zipSpecification.txt"), "foo");
+	/**
+	 * Client is required to call this method after he added all entries so the
+	 * final archive part is written.
+	 */
+	public void close() throws IOException {
+		zipOS.finish();
+	}
+
+	// --------------------------------------------------------------------------
+
+	/**
+	 * Simply zip + encrypt one "inFile" to one "outFile" useing "password".
+	 */
+	public static void zipAndEncrypt( File inFile, File outFile, String password ) throws IOException {
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
+		enc.add( inFile, password);
+		enc.close();
 	}
 
 }
