@@ -3,7 +3,7 @@ package de.idyl.crypto.zip.impl;
 /**
  * byte[] functionality
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class ByteArrayHelper {
 

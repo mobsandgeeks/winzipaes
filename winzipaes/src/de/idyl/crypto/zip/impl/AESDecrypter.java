@@ -3,7 +3,7 @@ package de.idyl.crypto.zip.impl;
 /**
  * Decrypt.
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public interface AESDecrypter {
 

@@ -12,7 +12,7 @@ import java.util.zip.ZipEntry;
 /**
  * Write zip entries to Zip-File, encrypted or not encrypted.
  * 
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class ExtZipOutputStream implements ZipConstants {
 

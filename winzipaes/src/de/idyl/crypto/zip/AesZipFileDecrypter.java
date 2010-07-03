@@ -30,7 +30,7 @@ import de.idyl.crypto.zip.impl.ZipConstants;
  *
  * @see http://www.winzip.com/aes_info.htm
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class AesZipFileDecrypter implements ZipConstants {
 

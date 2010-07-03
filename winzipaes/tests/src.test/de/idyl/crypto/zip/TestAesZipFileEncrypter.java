@@ -17,9 +17,10 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		String zipFileName = "tmpZipFile.zip";
 		File zipFile = getOutFile(zipFileName);
 		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
-		enc.add(getInFile("jpgSmall.jpg"), PASSWORD);
-		enc.add(getInFile("textMedium.txt"), PASSWORD);
-		enc.add(getInFile("textLong.txt"), PASSWORD);
+		enc.add(getInFile("jpgSmall.jpg"),"jpgSmall.jpg", PASSWORD);
+		enc.add(getInFile("textMedium.txt"),"textMedium.txt", PASSWORD);
+		File inFileTextLong = getInFile("textLong.txt"); 
+		enc.add(inFileTextLong, PASSWORD);
 		enc.close();
 		
 		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
@@ -28,7 +29,7 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		outFile = getOutFile("textMedium.txt");
 		dec.extractEntry(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
 		outFile = getOutFile("textLong.txt");
-		dec.extractEntry(dec.getEntry("textLong.txt"), outFile, PASSWORD);
+		dec.extractEntry(dec.getEntry(inFileTextLong.getPath()), outFile, PASSWORD);
 		dec.close();
 	}
 	
