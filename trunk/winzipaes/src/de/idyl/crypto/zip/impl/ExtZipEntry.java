@@ -8,7 +8,7 @@ import java.util.zip.ZipEntry;
  * information about one zip entry that is written to an encrypted zip archive
  * or read from one
  * 
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class ExtZipEntry extends ZipEntry {
 

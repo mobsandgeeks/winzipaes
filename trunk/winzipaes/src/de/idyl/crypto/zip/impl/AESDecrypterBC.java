@@ -17,7 +17,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
 /**
  * Adapter for bouncy castle crypto implementation (decryption).
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class AESDecrypterBC extends AESCryptoBase implements AESDecrypter {
 

@@ -5,7 +5,7 @@ package de.idyl.crypto.zip.impl;
  * Base class for crypto "adapters" to support aes operations
  * needed for winzip aes.
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class AESCryptoBase {
 

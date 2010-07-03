@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
 /**
  * direct access methods accepting position + type of data to read as args
  * 
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class ExtRandomAccessFile {
 

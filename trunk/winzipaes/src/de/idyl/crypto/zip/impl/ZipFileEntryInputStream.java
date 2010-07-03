@@ -12,7 +12,7 @@ import java.util.zip.ZipFile;
  * within one ZipFile. Necessary as java.util.zip.ZipInputStream only provides access to
  * the <b>uncompressed data</b>.
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class ZipFileEntryInputStream extends FileInputStream implements ZipConstants {
 

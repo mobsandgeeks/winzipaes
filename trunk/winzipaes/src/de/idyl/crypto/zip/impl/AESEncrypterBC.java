@@ -23,7 +23,7 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  * AES256 encrypter for 1 file using 1 PASSWORD + 1 SALT
  * to create 1 KEY used for subsequent calls to encrypt() method.
  *
- * @author <a href="mailto:olaf@merkert.de">Olaf Merkert</a>
+ * @author olaf@merkert.de
  */
 public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
 
