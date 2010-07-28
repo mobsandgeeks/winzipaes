@@ -25,7 +25,7 @@ import de.idyl.crypto.zip.impl.ZipFileEntryInputStream;
 
 /**
  * Create ZIP archive containing AES-256 encrypted entries. <br>
- * One instance of this class represents one encrypted ZIP file, that can recevie add() method calls
+ * One instance of this class represents one encrypted ZIP file, that can receive add() method calls
  * that must be followed by one final call to close() to write the final archive part and close the
  * output stream.
  * 
