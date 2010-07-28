@@ -2,8 +2,11 @@
 <project name="winzipaes" default="srcZip">
 
 	<target name="srcZip">
+		<tstamp>
+			<format property="TODAY" pattern="yyyyMMdd"/>
+		</tstamp>
 		<zip
-	  	destfile="winzipaes_src.zip"
+	  	destfile="winzipaes_src_${TODAY}.zip"
 	  	basedir="C:/data/projects/winzipaes"
 	  	includes="src/**/*, src.test/**/*"
 	  	excludes="**/.svn/*"/>
