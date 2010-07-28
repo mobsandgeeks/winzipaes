@@ -128,7 +128,12 @@ public class AesZipFileEncrypter {
 	 * @param password to be used for encryption
 	 */
 	public void add(File file, String pathForEntry, String password) throws IOException, UnsupportedEncodingException {
-		add(pathForEntry, new FileInputStream(file), password);
+		FileInputStream fis = new FileInputStream(file);
+		try {
+			add(pathForEntry, fis, password);
+		} finally {
+			fis.close();
+		}
 	}
 
 	/**
@@ -138,7 +143,12 @@ public class AesZipFileEncrypter {
 	 * @param password to be used for encryption
 	 */
 	public void add(File file, String password) throws IOException, UnsupportedEncodingException {
-		add(file.getPath(), new FileInputStream(file), password);
+		FileInputStream fis = new FileInputStream(file);
+		try {
+			add(file.getPath(), fis, password);
+		} finally {
+			fis.close();
+		}
 	}
 
 	/**
