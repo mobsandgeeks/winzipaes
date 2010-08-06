@@ -165,7 +165,8 @@ public class AesZipFileEncrypter {
 		// we need to first compress to know details of entry
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DeflaterOutputStream dos = new DeflaterOutputStream(bos, new Deflater(9, true), 8 * 1024);
-		int read, inputLen = 0;
+		int read=0;
+		long inputLen = 0;
 		byte[] buf = new byte[8 * 1024];
 		while ((read = is.read(buf)) > 0) {
 			inputLen += read;
