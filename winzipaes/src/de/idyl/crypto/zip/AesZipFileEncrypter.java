@@ -274,11 +274,22 @@ public class AesZipFileEncrypter {
 	// --------------------------------------------------------------------------
 
 	/**
-	 * Simply zip + encrypt one "inFile" to one "outFile" useing "password".
+	 * Zip + encrypt one "inFile" to one "outZipFile" using "password".
 	 */
 	public static void zipAndEncrypt(File inFile, File outFile, String password) throws IOException {
 		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
 		enc.add(inFile, password);
+		enc.close();
+	}
+
+	// --------------------------------------------------------------------------
+
+	/**
+	 * Encrypt all files from an existing zip to one new "zipOutFile" using "password".
+	 */
+	public static void zipAndEncryptAll(File inZipFile, File outFile, String password) throws IOException {
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
+		enc.addAll(inZipFile, password);
 		enc.close();
 	}
 
