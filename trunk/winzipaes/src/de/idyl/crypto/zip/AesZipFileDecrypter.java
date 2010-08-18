@@ -66,6 +66,10 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 	// --------------------------------------------------------------------------
 
+	/**
+	 * return list of entries from zip file - the list contains files as well as non-decryptable (!)
+	 * directories, that can be determined by using the isDirectory() method
+	 */
 	public List<ExtZipEntry> getEntryList() throws IOException, ZipException {
 		List<ExtZipEntry> out = new ArrayList<ExtZipEntry>();
 
@@ -136,6 +140,9 @@ public class AesZipFileDecrypter implements ZipConstants {
 		if( zipEntry==null ) {
 			throw new ZipException("zipEntry must NOT be NULL");
 		}
+		if( zipEntry.isDirectory() ) {
+			throw new ZipException("directory entries cannot be decrypted");
+		}
 		if( zipEntry.isEncrypted() ) {
 			byte[] pwBytes = password.getBytes(charset);
 			
@@ -157,7 +164,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 			// encrypter throws ZipException for wrong password
 			AESDecrypter decrypter = new AESDecrypterBC( pwBytes, salt, pwVerification );
 
-			// create tmp file to contains the decrypted, but still compressed data
+			// create tmp file that contains the decrypted, but still compressed data
 			File tmpFile = new File( outFile.getPath() + "_TMP.zip" );
 			makeDir( new File(tmpFile.getParent()) );
 			ExtZipOutputStream zos = new ExtZipOutputStream( tmpFile );
