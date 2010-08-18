@@ -31,9 +31,17 @@ public class TestIssues extends TestAesZipBase {
     for (int i=0; i<list.size(); i++){
       ExtZipEntry entry = list.get(i);
       String name = entry.getName();
-      dec.extractEntry( entry, getOutFile(name), "abcdef" );
+      if( !entry.isDirectory() ) {
+      	dec.extractEntry( entry, getOutFile(name), "abcdef" );
+      }
     }
+    
     dec.close();		
+	}
+
+	@Test
+	public void testIssue21b() throws Exception {
+		issue21Decrypt( getInZipFile("issue21b.zip") );
 	}
 	
 }
