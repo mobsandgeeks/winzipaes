@@ -1,5 +1,7 @@
 package de.idyl.crypto.zip;
 
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.zip.Deflater;
@@ -64,9 +66,25 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		checkZipEntry( aesDecrypter, fileName3, fileContent3, password );
 		
 		ExtZipEntry entry = aesDecrypter.getEntry(fileName3);
-		File extractedFile = new File(entry.getName()); 
+		File extractedFile = new File(entry.getName());
 		aesDecrypter.extractEntry( entry, extractedFile, password);
 		aesDecrypter.close();
+	}
+
+	@Test
+	public void testZipFileWithComment() throws Exception {
+		File zipFile = getOutFile("zipFileWithComment.zip");
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		File inFileTextLong = getInFile("textLong.txt");
+		enc.add(inFileTextLong, PASSWORD);
+		String comment = "some comment on this file";
+		enc.setComment(comment);
+		enc.close();
+
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		ExtZipEntry entry = dec.getEntry(inFileTextLong.toString());
+		assertNotNull( entry );
+		assertEquals( comment, dec.getComment() );
 	}
 	
 }
