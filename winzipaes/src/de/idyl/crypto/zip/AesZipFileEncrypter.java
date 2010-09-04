@@ -263,6 +263,12 @@ public class AesZipFileEncrypter {
 
 	// --------------------------------------------------------------------------
 
+	public void setComment( String comment ) {
+		zipOS.setComment(comment);
+	}
+
+	// --------------------------------------------------------------------------
+
 	/**
 	 * Client is required to call this method after he added all entries so the final archive part is
 	 * written.

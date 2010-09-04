@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.zip.ZipException;
 
 import org.junit.Test;
+import org.junit.runners.Suite.SuiteClasses;
 
 import de.idyl.crypto.zip.impl.ExtZipEntry;
 
+@SuiteClasses(TestAesZipFileDecrypter.class)
 public class TestAesZipFileDecrypter extends TestAesZipBase {
 
 	protected static boolean deleteDirectory(File path) {
@@ -121,4 +123,13 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		aesDecryptor.extractEntry( list.get(2), getOutFile("dir1/file2.txt"), password );		
 	}
 
+	@Test
+	public void testZipFileWithComment() throws Exception {
+		String password = "PASSWORD";
+		File aesFile = getInZipFile("Test_ENDSIG.zip");
+		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
+		List<ExtZipEntry> list = aesDecryptor.getEntryList();		
+		aesDecryptor.extractEntry( list.get(0), getOutFile("Test_ENDSIG"), password );		
+	}
+	
 }
