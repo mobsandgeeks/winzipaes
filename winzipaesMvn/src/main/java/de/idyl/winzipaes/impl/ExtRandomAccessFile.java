@@ -1,12 +1,13 @@
 package de.idyl.winzipaes.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-
 import static de.idyl.winzipaes.impl.ByteArrayHelper.toInt;
 import static de.idyl.winzipaes.impl.ByteArrayHelper.toLong;
 import static de.idyl.winzipaes.impl.ByteArrayHelper.toShort;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.Arrays;
 
 /**
  * direct access methods accepting position + type of data to read as args
@@ -88,7 +89,7 @@ public class ExtRandomAccessFile {
 
 	// --------------------------------------------------------------------------
 
-	public void seek(int pos) throws IOException {
+	public void seek(long pos) throws IOException {
 		file.seek(pos);
 	}
 
@@ -96,4 +97,18 @@ public class ExtRandomAccessFile {
 		return file.getFilePointer();
 	}
 
+	// --------------------------------------------------------------------------
+
+	// TODO implement a buffered version
+	public long lastPosOf(byte[] bytesToFind) throws IOException {
+		long out = -1;
+		for( long seekPos=file.length()-1-bytesToFind.length; seekPos>3 && out==-1; seekPos-- ) {
+			byte[] buffer = readByteArray(seekPos,bytesToFind.length);
+			if( Arrays.equals(bytesToFind,buffer) ) {
+				out = seekPos;
+			}
+		}
+		return out;
+	}
+	
 }

@@ -12,7 +12,7 @@ import java.util.zip.ZipEntry;
  */
 public class ExtZipEntry extends ZipEntry {
 
-	protected CentralDirectoryEntry centralDirectoryEntry;
+	private CentralDirectoryEntry centralDirectoryEntry;
 	
 	/** empty instance with only a name */
 	public ExtZipEntry(String name) {
@@ -29,6 +29,11 @@ public class ExtZipEntry extends ZipEntry {
 		setMethod(entry.getMethod());
 	}
 
+	public ExtZipEntry(String name,CentralDirectoryEntry centralDirectoryEntry) {
+		super(name);
+		this.centralDirectoryEntry = centralDirectoryEntry;
+	}
+	
 	public void initEncryptedEntry() {
 		setCrc(0); // CRC-32 / for encrypted files it's 0 as AES/MAC checks integritiy
 
@@ -42,7 +47,7 @@ public class ExtZipEntry extends ZipEntry {
 
 		// extra data header ID for AES encryption is 0x9901
 		extraBytes[0] = 0x01;
-		extraBytes[1] = (byte) 0x99;
+		extraBytes[1] = (byte)0x99;
 
 		// data size (currently 7, but subject to possible increase in the
 		// future)
@@ -73,6 +78,10 @@ public class ExtZipEntry extends ZipEntry {
 		return this.flag;
 	}
 
+	public boolean isAesEncrypted() {
+		return isEncrypted() && centralDirectoryEntry!=null && centralDirectoryEntry.isAesEncrypted();
+	}
+	
 	public boolean isEncrypted() {
 		return (flag & 1) > 0;
 	}
@@ -114,10 +123,6 @@ public class ExtZipEntry extends ZipEntry {
 
 	public CentralDirectoryEntry getCentralDirectoryEntry() {
 		return centralDirectoryEntry;
-	}
-
-	public void setCentralDirectoryEntry(CentralDirectoryEntry centralDirectoryEntry) {
-		this.centralDirectoryEntry = centralDirectoryEntry;
 	}
 
 	// --------------------------------------------------------------------------

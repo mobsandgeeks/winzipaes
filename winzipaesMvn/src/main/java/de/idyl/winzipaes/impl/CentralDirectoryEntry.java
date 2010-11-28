@@ -11,8 +11,8 @@ import de.idyl.winzipaes.AesZipFileDecrypter;
  * Wrapper for the central directory entry (CDE) of one file.
  * At the end of the ZIP file one CDE can be found for each
  * entry (file) within the zip file.
- * <pre>
-        central file header signature   4 bytes  (0x02014b50)
+ * 
+ 		central file header signature   4 bytes  (0x02014b50)
         version made by                 2 bytes	//	4
         version needed to extract       2 bytes //	6
         general purpose bit flag        2 bytes //	8
@@ -30,10 +30,9 @@ import de.idyl.winzipaes.AesZipFileDecrypter;
         external file attributes        4 bytes // 38
         relative offset of local header 4 bytes // 42
 
-        file name (variable size)		// 46
-        extra field (variable size)		// 46 + fileNameLength
-        file comment (variable size)	// 46 + fileNameLength + extraFieldLength
-    </pre>
+        file name (variable size)				// 46
+        extra field (variable size)				// 46 + fileNameLength
+        file comment (variable size)			// 46 + fileNameLength + extraFieldLength
  */
 public class CentralDirectoryEntry implements ZipConstants {
 
@@ -46,6 +45,8 @@ public class CentralDirectoryEntry implements ZipConstants {
 	protected long fileOffset;
 	
 	protected boolean isEncrypted;
+	
+	protected boolean isAesEncrypted;
 	
 	protected short fileNameLength;
 	
@@ -92,7 +93,6 @@ public class CentralDirectoryEntry implements ZipConstants {
 			LOG.fine( "fileName = " + this.fileName );
 		}
 		
-		
 		this.extraFieldOffset = this.fileOffset + 46 + this.fileNameLength;
 		this.extraFieldLength = raFile.readShort( fileOffset + 30 );
 		this.localHeaderOffset = raFile.readInt( fileOffset + 28 + 14 );
@@ -107,7 +107,7 @@ public class CentralDirectoryEntry implements ZipConstants {
 
 		if( this.isEncrypted ) {
 			byte[] efhid = raFile.readByteArray( this.extraFieldOffset, 2 );
-			if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {
+			if( efhid[0]!=0x01 || efhid[1]!=(byte)0x99 ) {
 				this.extraFieldOffset = localHeaderOffset+30+fileNameLength;
 				this.extraFieldLength = raFile.readShort( localHeaderOffset+28 );
 				if( LOG.isLoggable(Level.FINE) ) {
@@ -118,14 +118,17 @@ public class CentralDirectoryEntry implements ZipConstants {
 					throw new ZipException("extra field is of length 0 - this is probably not a WinZip AES encrypted entry");
 				}
 				efhid = raFile.readByteArray( extraFieldOffset, 2);
-				if( efhid[0]!=0x01 && efhid[1]!=0x99 ) {			
-					throw new ZipException("expected 'extra field header ID' (0x9901) neither found in central directory nor local file header");
+				if( efhid[0]==0x01 && efhid[1]==(byte)0x99 ) {
+					this.isAesEncrypted = true;
 				}
+			} else {
+				this.isAesEncrypted = true;
 			}
-			
-			this.actualCompressionMethod = raFile.readShort( getExtraFieldOffset() + 9 );			
 
-			this.localHeaderSize = 30 + getExtraFieldLength() + getFileNameLength();
+			if( this.isAesEncrypted ) {
+				this.actualCompressionMethod = raFile.readShort( getExtraFieldOffset() + 9 );
+				this.localHeaderSize = 30 + getExtraFieldLength() + getFileNameLength();
+			}
 		}
 
 		this.compressedSize = raFile.readInt( fileOffset + 20 );
@@ -203,6 +206,10 @@ public class CentralDirectoryEntry implements ZipConstants {
 	public short getCryptoHeaderLength() {
 		// TODO support 128+192 byte keys reduces the salt byte size to 8+2 or 12+2
 		return 18;
+	}
+
+	public boolean isAesEncrypted() {
+		return isAesEncrypted;
 	}
 	
 	@Override

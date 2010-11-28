@@ -27,6 +27,7 @@ import de.idyl.winzipaes.impl.ZipConstants;
  * List/Extract data from AES encrypted WinZip file (readOnly).
  *
  * TODO - support 128 + 192 keys
+ * TODO - refactor this class to use an ExtZipInputStream and put all "offset handling" there
  *
  * @see http://www.winzip.com/aes_info.htm
  *
@@ -54,16 +55,36 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 	protected File zipFile;
 	
+	protected String comment;
+	
 	public AesZipFileDecrypter( File zipFile ) throws IOException {
 		this.zipFile = zipFile;
 		this.raFile = new ExtRandomAccessFile( zipFile );
+		initDirOffsetPosAndComment();
+	}
+
+	protected void initDirOffsetPosAndComment() throws IOException {
+		// zip files without a comment contain the offset/position of the central directory at this fixed position
 		this.dirOffsetPos = zipFile.length() - 6;
+		final int dirOffset = raFile.readInt( this.dirOffsetPos - 16 );
+		if( dirOffset!=ENDSIG ) {
+			// if a comment is present, search the ENDSIG constant, starting at the end of the zip file
+			byte[] endsig = ByteArrayHelper.toByteArray((int)ZipConstants.ENDSIG);
+			long endsigPos = raFile.lastPosOf(endsig);
+			if( endsigPos==-1 ) {
+				throw new ZipException("expected ENDSIC not found (marks the beginning of the central directory at end of the zip file)");
+			} else {
+				this.dirOffsetPos = endsigPos+16;
+				short commentLength = raFile.readShort( this.dirOffsetPos + 4 );
+				this.comment = new String( raFile.readByteArray( this.dirOffsetPos+6, commentLength ) );
+			}
+		}		
 	}
 
 	public void close() throws IOException {
 		raFile.close();
 	}
-
+	
 	// --------------------------------------------------------------------------
 
 	/**
@@ -74,7 +95,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 		List<ExtZipEntry> out = new ArrayList<ExtZipEntry>();
 
 		short totalNumberOfEntries = this.getNumberOfEntries();
-		int dirOffset = raFile.readInt( this.dirOffsetPos );
+		final int dirOffset = raFile.readInt( this.dirOffsetPos );
 
 		long fileOffset = dirOffset;
 		for( int i=0; i<totalNumberOfEntries; i++ ) {
@@ -89,18 +110,15 @@ public class AesZipFileDecrypter implements ZipConstants {
 			long fileDataOffset = raFile.readInt( fileOffsetPos );
 			int locsig = raFile.readInt( fileDataOffset );
 			if( locsig!=LOCSIG ) {
-				//throw new ZipException("expected LOCSIC not found at alleged position of data for file no " + (i+1));
-				System.out.println( fileOffsetPos + " - " + fileNameLength );
+				throw new ZipException("expected LOCSIC not found at alleged position of data for file no " + (i+1));
 			}
 
 			byte[] fileNameBytes = raFile.readByteArray( fileOffsetPos+4, fileNameLength );
 			long nextFileOffset = raFile.getFilePointer();
 			String fileName = new String( fileNameBytes, charset );
 			
-			ExtZipEntry zipEntry = new ExtZipEntry( fileName );
-
 			CentralDirectoryEntry cde = new CentralDirectoryEntry( raFile, fileOffset );
-			zipEntry.setCentralDirectoryEntry( cde );
+			ExtZipEntry zipEntry = new ExtZipEntry( fileName, cde );
 
 			zipEntry.setCompressedSize( cde.getCompressedSize() );
 			zipEntry.setSize( cde.getUncompressedSize() );
@@ -147,6 +165,10 @@ public class AesZipFileDecrypter implements ZipConstants {
 			byte[] pwBytes = password.getBytes(charset);
 			
 			CentralDirectoryEntry cde = zipEntry.getCentralDirectoryEntry();
+			if( !cde.isAesEncrypted() ) {
+				throw new ZipException("only AES encrypted files are supported");
+			}
+			
 			int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
 			
 			byte[] salt = raFile.readByteArray( cryptoHeaderOffset, 16 );
@@ -231,6 +253,11 @@ public class AesZipFileDecrypter implements ZipConstants {
 	      dir.mkdir();
 	    }
 	  }
+	}
+
+	/** return the zip file's comment (if defined) */
+	public String getComment() {
+		return comment;
 	}
 	
 	// --------------------------------------------------------------------------
