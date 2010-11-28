@@ -252,7 +252,7 @@ public class AesZipFileEncrypter {
 	 * Encrypted data of each file has the same size as the compressed data, though the file size is
 	 * increased by 26 bytes for salt and pw-verification bytes.<br>
 	 * While the {@link #add(File, String)} method does not need an additional zip file, this method
-	 * comes in handy, when your input data is larger then your available memory. 
+	 * comes in handy, when your input data is larger than your available memory. 
 	 * 
 	 * @param pathToZipFile
 	 *          provides zipFileEntries for encryption
