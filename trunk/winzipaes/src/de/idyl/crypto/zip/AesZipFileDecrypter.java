@@ -110,18 +110,15 @@ public class AesZipFileDecrypter implements ZipConstants {
 			long fileDataOffset = raFile.readInt( fileOffsetPos );
 			int locsig = raFile.readInt( fileDataOffset );
 			if( locsig!=LOCSIG ) {
-				//throw new ZipException("expected LOCSIC not found at alleged position of data for file no " + (i+1));
-				System.out.println( fileOffsetPos + " - " + fileNameLength );
+				throw new ZipException("expected LOCSIC not found at alleged position of data for file no " + (i+1));
 			}
 
 			byte[] fileNameBytes = raFile.readByteArray( fileOffsetPos+4, fileNameLength );
 			long nextFileOffset = raFile.getFilePointer();
 			String fileName = new String( fileNameBytes, charset );
 			
-			ExtZipEntry zipEntry = new ExtZipEntry( fileName );
-
 			CentralDirectoryEntry cde = new CentralDirectoryEntry( raFile, fileOffset );
-			zipEntry.setCentralDirectoryEntry( cde );
+			ExtZipEntry zipEntry = new ExtZipEntry( fileName, cde );
 
 			zipEntry.setCompressedSize( cde.getCompressedSize() );
 			zipEntry.setSize( cde.getUncompressedSize() );
@@ -168,6 +165,10 @@ public class AesZipFileDecrypter implements ZipConstants {
 			byte[] pwBytes = password.getBytes(charset);
 			
 			CentralDirectoryEntry cde = zipEntry.getCentralDirectoryEntry();
+			if( !cde.isAesEncrypted() ) {
+				throw new ZipException("only AES encrypted files are supported");
+			}
+			
 			int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
 			
 			byte[] salt = raFile.readByteArray( cryptoHeaderOffset, 16 );
