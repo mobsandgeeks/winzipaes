@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -47,6 +48,10 @@ public class AbstractTestAesZip {
 	protected final static String OUT_PATH = BASE_PATH + File.separator + "out";
 
 	// --------------------------------------------------------------------------
+	
+	protected static FileInputStream getInFileAsStream( String name ) throws FileNotFoundException {
+		return new FileInputStream( new File( IN_PATH + File.separator + name ) );
+	}
 	
 	protected static File getInFile( String name ) {
 		return new File( IN_PATH + File.separator + name );
