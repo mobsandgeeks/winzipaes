@@ -15,6 +15,24 @@ import de.idyl.crypto.zip.impl.ExtZipEntry;
 public class TestAesZipFileEncrypter extends TestAesZipBase {
 
 	@Test
+	public void testVariousFileTypesWithStream() throws Exception {
+		String zipFileName = "tmpZipFile.zip";
+		File zipFile = getOutFile(zipFileName);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		
+		enc.add("jpgSmall.jpg",getInFileAsStream("jpgSmall.jpg"), PASSWORD);
+		enc.add("textMedium.txt",getInFileAsStream("textMedium.txt"), PASSWORD);
+		enc.close();
+		
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		File outFile = getOutFile("jpgSmall.jpg");
+		dec.extractEntry(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
+		outFile = getOutFile("textMedium.txt");
+		dec.extractEntry(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
+		dec.close();
+	}
+	
+	@Test
 	public void testVariousFileTypes() throws Exception {
 		String zipFileName = "tmpZipFile.zip";
 		File zipFile = getOutFile(zipFileName);
