@@ -1,7 +1,10 @@
 package de.idyl.winzipaes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.Deflater;
 import java.util.zip.ZipOutputStream;
 
@@ -12,6 +15,15 @@ import de.idyl.winzipaes.impl.ExtZipEntry;
 
 public class TestAesZipFileEncrypter extends AbstractTestAesZip {
 
+	@Test
+	public void testWithOutputStream() throws IOException {
+		OutputStream bao = new ByteArrayOutputStream();
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(bao);
+		enc.add("jpgSmall.jpg",getInFileAsStream("jpgSmall.jpg"), PASSWORD);
+		enc.add("textMedium.txt",getInFileAsStream("textMedium.txt"), PASSWORD);
+		enc.close();
+	}
+	
 	@Test
 	public void testVariousFileTypesWithStream() throws Exception {
 		String zipFileName = "tmpZipFile.zip";
