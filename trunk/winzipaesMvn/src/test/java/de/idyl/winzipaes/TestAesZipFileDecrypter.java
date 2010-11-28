@@ -1,6 +1,7 @@
 package de.idyl.winzipaes;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +28,15 @@ public class TestAesZipFileDecrypter extends AbstractTestAesZip {
     }
     return( path.delete() );
 	}
-	
+
+	@Test
+	public void testIsAesEncrypted() throws Exception {
+		File aesFile = getInZipFile("1winzipEncryptedFile.zip");
+		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
+		ExtZipEntry entry = aesDecryptor.getEntry("foo.txt");
+		assertTrue( entry.isAesEncrypted() );
+	}
+
 	@Test
 	public void test1FileInZipFile() throws Exception {
 		String password = "123456";
