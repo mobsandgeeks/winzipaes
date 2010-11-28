@@ -20,7 +20,7 @@ public class ExtZipOutputStream implements ZipConstants {
 		out = new FileOutputStream(file);
 	}
 
-	protected ExtZipOutputStream(OutputStream out) {
+	public ExtZipOutputStream(OutputStream out) {
 		this.out = out;
 	}
 
