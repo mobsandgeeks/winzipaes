@@ -1,5 +1,8 @@
 package de.idyl.crypto.zip;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.util.List;
 
@@ -43,5 +46,23 @@ public class TestIssues extends TestAesZipBase {
 	public void testIssue21b() throws Exception {
 		issue21Decrypt( getInZipFile("issue21b.zip") );
 	}
-	
+
+	@Test
+	public void testIssue18_10() throws Exception {
+		File zipFile = getOutFile("issu18_10_out.zip");
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		File inFile = getInZipFile("issue18_10.zip");
+		enc.addAll(inFile, PASSWORD);
+		enc.close();
+
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		List<ExtZipEntry> entryList = dec.getEntryList();
+		assertNotNull(entryList);
+		assertFalse(entryList.isEmpty());
+		
+		ExtZipEntry entry = entryList.get(0);
+		File extFile = getOutFile(entry.getName());
+		dec.extractEntry(entry, extFile, PASSWORD);
+	}
+
 }
