@@ -81,7 +81,7 @@ public class AesZipFileEncrypter {
 
 	protected void add(ZipFile inFile, String password) throws IOException,
 			UnsupportedEncodingException {
-		ZipFileEntryInputStream zfe = new ZipFileEntryInputStream(inFile);
+		ZipFileEntryInputStream zfe = new ZipFileEntryInputStream(inFile.getName());			
 		Enumeration<? extends ZipEntry> en = inFile.entries();
 		while (en.hasMoreElements()) {
 			ZipEntry ze = en.nextElement();
