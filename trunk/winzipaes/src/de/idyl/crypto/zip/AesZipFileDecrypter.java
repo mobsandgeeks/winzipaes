@@ -297,7 +297,6 @@ public class AesZipFileDecrypter implements ZipConstants {
 			throws IOException, ZipException, DataFormatException {
 		checkZipEntry(zipEntry);
 
-		InputStream is = null;
 		ZipInputStream zipInputStream = null;
 		ByteArrayOutputStream bos = null;
 		try {
@@ -364,9 +363,6 @@ public class AesZipFileDecrypter implements ZipConstants {
 		} finally {
 			if (bos != null) {
 				bos.close();
-			}
-			if (is != null) {
-				is.close();
 			}
 			if (zipInputStream != null) {
 				zipInputStream.close();
