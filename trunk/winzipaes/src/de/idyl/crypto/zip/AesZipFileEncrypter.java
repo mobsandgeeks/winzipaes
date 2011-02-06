@@ -82,13 +82,16 @@ public class AesZipFileEncrypter {
 	protected void add(ZipFile inFile, String password) throws IOException,
 			UnsupportedEncodingException {
 		ZipFileEntryInputStream zfe = new ZipFileEntryInputStream(inFile.getName());			
-		Enumeration<? extends ZipEntry> en = inFile.entries();
-		while (en.hasMoreElements()) {
-			ZipEntry ze = en.nextElement();
-			zfe.nextEntry(ze);
-			add(ze, zfe, password);
+		try {
+			Enumeration<? extends ZipEntry> en = inFile.entries();
+			while (en.hasMoreElements()) {
+				ZipEntry ze = en.nextElement();
+				zfe.nextEntry(ze);
+				add(ze, zfe, password);
+			}
+		} finally {
+			zfe.close();
 		}
-		zfe.close();
 	}
 
 	// TODO - zipEntry might use extended local header
@@ -207,24 +210,6 @@ public class AesZipFileEncrypter {
 	// --------------------------------------------------------------------------
 
 	/**
-	 * add one file to encrypted zip file
-	 * 
-	 * @param pathToFile
-	 *          the file to add
-	 * @param password
-	 *          the password used for encryption
-	 * @throws IOException
-	public void add(File pathToFile, String password) throws IOException {
-		File outZipFile = new File(pathToFile + ".zip");
-		zip(pathToFile, outZipFile);
-		addAll(outZipFile, password);
-		outZipFile.delete();
-	}
-	 */
-
-	// --------------------------------------------------------------------------
-
-	/**
 	 * Zip contents of inFile to outFile.
 	 */
 	public static void zip(File inFile, File outFile) throws IOException {
@@ -232,16 +217,18 @@ public class AesZipFileEncrypter {
 		FileOutputStream fout = new FileOutputStream(outFile);
 		ZipOutputStream zout = new ZipOutputStream(fout);
 
-		zout.putNextEntry(new ZipEntry(inFile.getName()));
-		byte[] buffer = new byte[1024];
-		int len;
-		while ((len = fin.read(buffer)) > 0) {
-			zout.write(buffer, 0, len);
+		try {
+			zout.putNextEntry(new ZipEntry(inFile.getName()));
+			byte[] buffer = new byte[1024];
+			int len;
+			while ((len = fin.read(buffer)) > 0) {
+				zout.write(buffer, 0, len);
+			}
+			zout.closeEntry();
+		} finally {
+			zout.close();
+			fin.close();
 		}
-		zout.closeEntry();
-
-		zout.close();
-		fin.close();
 	}
 
 	// --------------------------------------------------------------------------
@@ -262,8 +249,11 @@ public class AesZipFileEncrypter {
 	 */
 	public void addAll(File pathToZipFile, String password) throws IOException {
 		ZipFile zipFile = new ZipFile(pathToZipFile);
-		add(zipFile, password);
-		zipFile.close();
+		try {
+			add(zipFile, password);
+		} finally {
+			zipFile.close();
+		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -289,8 +279,11 @@ public class AesZipFileEncrypter {
 	 */
 	public static void zipAndEncrypt(File inFile, File outFile, String password) throws IOException {
 		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
-		enc.add(inFile, password);
-		enc.close();
+		try {
+			enc.add(inFile, password);
+		} finally {
+			enc.close();
+		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -300,8 +293,11 @@ public class AesZipFileEncrypter {
 	 */
 	public static void zipAndEncryptAll(File inZipFile, File outFile, String password) throws IOException {
 		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
-		enc.addAll(inZipFile, password);
-		enc.close();
+		try {
+			enc.addAll(inZipFile, password);
+		} finally {
+			enc.close();
+		}
 	}
 
 }
