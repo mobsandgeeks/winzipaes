@@ -171,6 +171,10 @@ public class ExtZipOutputStream implements ZipConstants {
 
 		out.close();
 	}
+	
+	public void close() throws IOException {
+		out.close();
+	}
 
 	public String getComment() {
 		return comment;
