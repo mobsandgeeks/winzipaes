@@ -35,7 +35,7 @@ public class TestIssues extends TestAesZipBase {
       ExtZipEntry entry = list.get(i);
       String name = entry.getName();
       if( !entry.isDirectory() ) {
-      	dec.extractEntry( entry, getOutFile(name), "abcdef" );
+      	dec.extractEntryWithTmpFile( entry, getOutFile(name), "abcdef" );
       }
     }
     
@@ -62,7 +62,7 @@ public class TestIssues extends TestAesZipBase {
 		
 		ExtZipEntry entry = entryList.get(0);
 		File extFile = getOutFile(entry.getName());
-		dec.extractEntry(entry, extFile, PASSWORD);
+		dec.extractEntryWithTmpFile(entry, extFile, PASSWORD);
 	}
 
 }

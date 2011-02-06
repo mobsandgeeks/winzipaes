@@ -49,6 +49,16 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		checkZipEntry( aesDecryptor, "foo.txt", "This is the contents of file foo.txt - It should be long enough, so we really have some", password );
 	}
 	
+//	@Test
+//	public void test1FileInZipFileWithTmpFile() throws Exception {
+//		String password = "123456";
+//		File aesFile = getInZipFile("1winzipEncryptedFile.zip");
+//
+//		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
+//		
+//		checkZipEntry( aesDecryptor, "foo.txt", "This is the contents of file foo.txt - It should be long enough, so we really have some", password );
+//	}
+	
 	@Test
 	public void test2FilesInZipFile() throws Exception {
 		String password = "123456";
@@ -78,7 +88,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();
 		
-		aesDecryptor.extractEntry( list.get(0), getOutFile("test7.txt"), password );
+		aesDecryptor.extractEntryWithTmpFile( list.get(0), getOutFile("test7.txt"), password );
 	}
 
 	@Test
@@ -88,7 +98,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		File aesFile = getInZipFile("testDNZ.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();
-		aesDecryptor.extractEntry( list.get(0), getOutFile("testDNZ.txt"), password );
+		aesDecryptor.extractEntryWithTmpFile( list.get(0), getOutFile("testDNZ.txt"), password );
 	}
 	
 	@Test
@@ -98,7 +108,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		File aesFile = getInZipFile("mixed.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();		
-		aesDecryptor.extractEntry( list.get(0), getOutFile("bar"), password );
+		aesDecryptor.extractEntryWithTmpFile( list.get(0), getOutFile("bar"), password );
 	}
 
 	@Test(expected=ZipException.class)
@@ -108,7 +118,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		File aesFile = getInZipFile("mixed.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();		
-		aesDecryptor.extractEntry( list.get(1), getOutFile("foo"), password );
+		aesDecryptor.extractEntryWithTmpFile( list.get(1), getOutFile("foo"), password );
 	}
 	
 	@Test
@@ -118,7 +128,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		File aesFile = getInZipFile("subdir.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();
-		aesDecryptor.extractEntry( list.get(1), getOutFile("bar"), password );
+		aesDecryptor.extractEntryWithTmpFile( list.get(1), getOutFile("bar"), password );
 	}
 	
 	@Test
@@ -129,7 +139,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();		
 		//aesDecryptor.extractEntry( list.get(0), new File(TEST_OUT_PATH + "file1.txt"), password );
 		// entry 1 is a directory
-		aesDecryptor.extractEntry( list.get(2), getOutFile("dir1/file2.txt"), password );		
+		aesDecryptor.extractEntryWithTmpFile( list.get(2), getOutFile("dir1/file2.txt"), password );		
 	}
 
 	@Test
@@ -138,7 +148,7 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		File aesFile = getInZipFile("Test_ENDSIG.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile);
 		List<ExtZipEntry> list = aesDecryptor.getEntryList();		
-		aesDecryptor.extractEntry( list.get(0), getOutFile("Test_ENDSIG"), password );		
+		aesDecryptor.extractEntryWithTmpFile( list.get(0), getOutFile("Test_ENDSIG"), password );		
 	}
 	
 }
