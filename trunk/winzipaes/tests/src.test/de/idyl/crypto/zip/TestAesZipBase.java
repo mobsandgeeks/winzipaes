@@ -108,6 +108,7 @@ public class TestAesZipBase {
 		}
 		File decFile = getOutFile("extractedFile.txt");		
 		aesDecryptor.extractEntry(entry, decFile, password);
+		aesDecryptor.extractEntryWithTmpFile(entry, decFile, password);
 		BufferedReader fr = new BufferedReader( new FileReader(decFile) );
 		String line = fr.readLine();
 		assertEquals( fileContent, line );

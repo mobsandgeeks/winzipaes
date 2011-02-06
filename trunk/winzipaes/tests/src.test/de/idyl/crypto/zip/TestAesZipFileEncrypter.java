@@ -39,9 +39,9 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		
 		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
 		File outFile = getOutFile("jpgSmall.jpg");
-		dec.extractEntry(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
+		dec.extractEntryWithTmpFile(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
 		outFile = getOutFile("textMedium.txt");
-		dec.extractEntry(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
+		dec.extractEntryWithTmpFile(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
 		dec.close();
 	}
 	
@@ -58,11 +58,11 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		
 		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
 		File outFile = getOutFile("jpgSmall.jpg");
-		dec.extractEntry(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
+		dec.extractEntryWithTmpFile(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
 		outFile = getOutFile("textMedium.txt");
-		dec.extractEntry(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
+		dec.extractEntryWithTmpFile(dec.getEntry("textMedium.txt"), outFile, PASSWORD);
 		outFile = getOutFile("textLong.txt");
-		dec.extractEntry(dec.getEntry(inFileTextLong.getPath()), outFile, PASSWORD);
+		dec.extractEntryWithTmpFile(dec.getEntry(inFileTextLong.getPath()), outFile, PASSWORD);
 		dec.close();
 	}
 	
@@ -98,7 +98,7 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		
 		ExtZipEntry entry = aesDecrypter.getEntry(fileName3);
 		File extractedFile = new File(entry.getName());
-		aesDecrypter.extractEntry( entry, extractedFile, password);
+		aesDecrypter.extractEntryWithTmpFile( entry, extractedFile, password);
 		aesDecrypter.close();
 	}
 
