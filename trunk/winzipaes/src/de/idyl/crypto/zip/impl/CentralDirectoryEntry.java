@@ -227,7 +227,7 @@ public class CentralDirectoryEntry implements ZipConstants {
 			sb.append( "offset\t\t\t = ").append( this.getOffset() ).append('\n');
 			//sb.append().append().append('\n');
 		} catch( IOException ioEx ) {
-			ioEx.printStackTrace();
+			LOG.log(Level.WARNING, ioEx.getMessage(), ioEx); 
 		}
 		return sb.toString();
 	}
