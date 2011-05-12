@@ -4,7 +4,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
+import java.util.zip.Deflater;
+import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
@@ -65,4 +68,29 @@ public class TestIssues extends TestAesZipBase {
 		dec.extractEntryWithTmpFile(entry, extFile, PASSWORD);
 	}
 
+	@Test
+	public void testIssue33() throws Exception {
+		String fileName1 = "file1.txt";
+		String fileContent1 = "";
+
+		File tmpZipFile = getOutFile("tmpFile.zip");
+		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(tmpZipFile));
+		zout.setLevel(Deflater.BEST_COMPRESSION);
+		addZipEntry(fileName1, fileContent1, zout);
+		zout.close();
+
+		String password = "123456";
+		File aesFile = getOutFile("aesFile.zip");
+		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
+		aesEncryptor.addAll(tmpZipFile, password);
+		aesEncryptor.close();
+		tmpZipFile.delete();
+
+		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile);
+		
+		checkZipEntry( aesDecrypter, fileName1, fileContent1, password );
+		
+		aesDecrypter.close();
+	}
+	
 }

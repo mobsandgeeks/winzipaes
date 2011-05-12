@@ -106,12 +106,16 @@ public class TestAesZipBase {
 		if( entry==null ) {
 			throw new FileNotFoundException( fileName );
 		}
-		File decFile = getOutFile("extractedFile.txt");		
+		File decFile = getOutFile("extractedFile.txt");
 		aesDecryptor.extractEntry(entry, decFile, password);
 		aesDecryptor.extractEntryWithTmpFile(entry, decFile, password);
 		BufferedReader fr = new BufferedReader( new FileReader(decFile) );
 		String line = fr.readLine();
-		assertEquals( fileContent, line );
+		if( decFile.length()>0 ) {
+			assertEquals( fileContent, line );
+		} else {
+			assertEquals( null, line );
+		}
 		decFile.delete();
 	}
 	

@@ -349,16 +349,18 @@ public class AesZipFileDecrypter implements ZipConstants {
 			}
 			zipInputStream = new ZipInputStream(new ByteArrayInputStream(bos.toByteArray()));
 			ZipEntry entry = zipInputStream.getNextEntry();
-			int read = zipInputStream.read(buffer);
-			// at the end of the entry read-cycle a CRC check is performed.
-			// because our entry doesn't have a CRC this will result in an Exception
-			// we solve this by updating a CRC and pass this to the Entry.
-			CRC32 crc32 = new CRC32();
-			while (read > 0) {
-				outStream.write(buffer, 0, read);
-				crc32.update(buffer, 0, read);
-				entry.setCrc(crc32.getValue());
-				read = zipInputStream.read(buffer);
+			if( entry.getSize()!=0 ) {
+				int read = zipInputStream.read(buffer);
+				// at the end of the entry read-cycle a CRC check is performed.
+				// because our entry doesn't have a CRC this will result in an Exception
+				// we solve this by updating a CRC and pass this to the Entry.
+				CRC32 crc32 = new CRC32();
+				while (read > 0) {
+					outStream.write(buffer, 0, read);
+					crc32.update(buffer, 0, read);
+					entry.setCrc(crc32.getValue());
+					read = zipInputStream.read(buffer);
+				}
 			}
 		} finally {
 			if (bos != null) {
