@@ -1,5 +1,7 @@
 package de.idyl.crypto.zip.impl;
 
+import java.util.zip.ZipException;
+
 /**
  * Encrypt.
  *
@@ -7,7 +9,9 @@ package de.idyl.crypto.zip.impl;
  */
 public interface AESEncrypter {
 
-	public void encrypt( byte[] in, int length );
+	public void init(String pwStr, int keySize) throws ZipException;
+
+	public void encrypt(byte[] in, int length);
 
 	public byte[] getSalt();
 

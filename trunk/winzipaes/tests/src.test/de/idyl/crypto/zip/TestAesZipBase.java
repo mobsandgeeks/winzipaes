@@ -17,6 +17,10 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.Before;
 
+import de.idyl.crypto.zip.impl.AESDecrypter;
+import de.idyl.crypto.zip.impl.AESDecrypterBC;
+import de.idyl.crypto.zip.impl.AESEncrypter;
+import de.idyl.crypto.zip.impl.AESEncrypterBC;
 import de.idyl.crypto.zip.impl.ExtZipEntry;
 
 public class TestAesZipBase {
@@ -118,5 +122,11 @@ public class TestAesZipBase {
 		}
 		decFile.delete();
 	}
+
+	// --------------------------------------------------------------------------
+
+	protected final AESDecrypter decrypter = new AESDecrypterBC();
+
+	protected final AESEncrypter encrypter = new AESEncrypterBC();
 	
 }

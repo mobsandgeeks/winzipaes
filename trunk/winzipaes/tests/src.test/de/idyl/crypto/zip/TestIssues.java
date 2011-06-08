@@ -19,20 +19,20 @@ public class TestIssues extends TestAesZipBase {
 	public void testIssue21() throws Exception {
 		File inFile = getInZipFile("issue21.zip");
 		File encFile = getOutFile("issue21outA.zip");
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(encFile);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(encFile,encrypter);
     enc.addAll(inFile, "abcdef");
     enc.close();
     issue21Decrypt(encFile);
 
 		encFile = getOutFile("issue21outB.zip");
-    AesZipFileEncrypter.zipAndEncryptAll( inFile, encFile, "abcdef" );
+    AesZipFileEncrypter.zipAndEncryptAll( inFile, encFile, "abcdef", encrypter );
     issue21Decrypt(encFile);
 
     cleanOut();
 	}
 	
 	protected void issue21Decrypt(File encFile) throws Exception {
-		AesZipFileDecrypter dec = new AesZipFileDecrypter(encFile);    
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(encFile,decrypter);    
 		List<ExtZipEntry> list = dec.getEntryList();
     for (int i=0; i<list.size(); i++){
       ExtZipEntry entry = list.get(i);
@@ -53,12 +53,12 @@ public class TestIssues extends TestAesZipBase {
 	@Test
 	public void testIssue18_10() throws Exception {
 		File zipFile = getOutFile("issu18_10_out.zip");
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile,encrypter);
 		File inFile = getInZipFile("issue18_10.zip");
 		enc.addAll(inFile, PASSWORD);
 		enc.close();
 
-		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile,decrypter);
 		List<ExtZipEntry> entryList = dec.getEntryList();
 		assertNotNull(entryList);
 		assertFalse(entryList.isEmpty());
@@ -81,12 +81,12 @@ public class TestIssues extends TestAesZipBase {
 
 		String password = "123456";
 		File aesFile = getOutFile("aesFile.zip");
-		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
+		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile,encrypter);
 		aesEncryptor.addAll(tmpZipFile, password);
 		aesEncryptor.close();
 		tmpZipFile.delete();
 
-		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile);
+		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile,decrypter);
 		
 		checkZipEntry( aesDecrypter, fileName1, fileContent1, password );
 		

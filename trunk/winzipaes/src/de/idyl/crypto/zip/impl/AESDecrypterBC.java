@@ -21,7 +21,10 @@ import org.bouncycastle.crypto.params.ParametersWithIV;
  */
 public class AESDecrypterBC extends AESCryptoBase implements AESDecrypter {
 
-	public AESDecrypterBC( byte[] pwBytes, byte[] salt, byte[] pwVerification ) throws ZipException {
+	// TODO consider keySize (but: we probably need to adapt the key size for the zip file as well)
+	public void init( String pwStr, int keySize, byte[] salt, byte[] pwVerification ) throws ZipException {
+		byte[] pwBytes = pwStr.getBytes();
+		
 		super.saltBytes = salt;
 
 		PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();

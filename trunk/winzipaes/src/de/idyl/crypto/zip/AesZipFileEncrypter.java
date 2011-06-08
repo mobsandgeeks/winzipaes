@@ -19,7 +19,6 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import de.idyl.crypto.zip.impl.AESEncrypter;
-import de.idyl.crypto.zip.impl.AESEncrypterBC;
 import de.idyl.crypto.zip.impl.ExtZipEntry;
 import de.idyl.crypto.zip.impl.ExtZipOutputStream;
 import de.idyl.crypto.zip.impl.ZipFileEntryInputStream;
@@ -41,6 +40,10 @@ public class AesZipFileEncrypter {
 
 	// --------------------------------------------------------------------------
 
+	protected AESEncrypter encrypter;
+	
+	// --------------------------------------------------------------------------
+
 	protected ExtZipOutputStream zipOS;
 
 	/**
@@ -48,8 +51,9 @@ public class AesZipFileEncrypter {
 	 * @param pathName
 	 *          to output zip file (aes encrypted zip file)
 	 */
-	public AesZipFileEncrypter(String pathName) throws IOException {
+	public AesZipFileEncrypter(String pathName, AESEncrypter encrypter) throws IOException {
 		zipOS = new ExtZipOutputStream(new File(pathName));
+		this.encrypter = encrypter;
 	}
 
 	/**
@@ -57,12 +61,14 @@ public class AesZipFileEncrypter {
 	 * @param outFile
 	 *          output file (aes encrypted zip file)
 	 */
-	public AesZipFileEncrypter(File outFile) throws IOException {
+	public AesZipFileEncrypter(File outFile, AESEncrypter encrypter) throws IOException {
 		zipOS = new ExtZipOutputStream(outFile);
+		this.encrypter = encrypter;
 	}
 
-	public AesZipFileEncrypter(OutputStream outFile) throws IOException {
+	public AesZipFileEncrypter(OutputStream outFile, AESEncrypter encrypter) throws IOException {
 		zipOS = new ExtZipOutputStream(outFile);
+		this.encrypter = encrypter;
 	}
 
 	// --------------------------------------------------------------------------
@@ -97,7 +103,7 @@ public class AesZipFileEncrypter {
 	// TODO - zipEntry might use extended local header
 	protected void add(ZipEntry zipEntry, ZipFileEntryInputStream zipData, String password)
 			throws IOException, UnsupportedEncodingException {
-		AESEncrypter aesEncrypter = new AESEncrypterBC(password.getBytes("iso-8859-1"));
+		encrypter.init(password, 256);
 
 		ExtZipEntry entry = new ExtZipEntry(zipEntry.getName());
 		entry.setMethod(zipEntry.getMethod());
@@ -108,18 +114,18 @@ public class AesZipFileEncrypter {
 
 		zipOS.putNextEntry(entry);
 		// ZIP-file data contains: 1. salt 2. pwVerification 3. encryptedContent 4. authenticationCode
-		zipOS.writeBytes(aesEncrypter.getSalt());
-		zipOS.writeBytes(aesEncrypter.getPwVerification());
+		zipOS.writeBytes(encrypter.getSalt());
+		zipOS.writeBytes(encrypter.getPwVerification());
 
 		byte[] data = new byte[1024];
 		int read = zipData.read(data);
 		while (read != -1) {
-			aesEncrypter.encrypt(data, read);
+			encrypter.encrypt(data, read);
 			zipOS.writeBytes(data, 0, read);
 			read = zipData.read(data);
 		}
 
-		byte[] finalAuthentication = aesEncrypter.getFinalAuthentication();
+		byte[] finalAuthentication = encrypter.getFinalAuthentication();
 		if (LOG.isLoggable(Level.FINE)) {
 			LOG.fine("finalAuthentication=" + Arrays.toString(finalAuthentication) + " at pos="
 					+ zipOS.getWritten());
@@ -167,7 +173,7 @@ public class AesZipFileEncrypter {
 	 * @param password to be used for encryption
 	 */
 	public void add(String name, InputStream is, String password) throws IOException,	UnsupportedEncodingException {
-		AESEncrypter aesEncrypter = new AESEncrypterBC(password.getBytes("iso-8859-1"));
+		encrypter.init(password, 256);
 
 		// Compress contents of inputStream and report on bytes read
 		// we need to first compress to know details of entry
@@ -192,13 +198,13 @@ public class AesZipFileEncrypter {
 
 		zipOS.putNextEntry(entry);
 		// ZIP-file data contains: 1. salt 2. pwVerification 3. encryptedContent 4. authenticationCode
-		zipOS.writeBytes(aesEncrypter.getSalt());
-		zipOS.writeBytes(aesEncrypter.getPwVerification());
+		zipOS.writeBytes(encrypter.getSalt());
+		zipOS.writeBytes(encrypter.getPwVerification());
 
-		aesEncrypter.encrypt(data, data.length);
+		encrypter.encrypt(data, data.length);
 		zipOS.writeBytes(data, 0, data.length);
 
-		byte[] finalAuthentication = aesEncrypter.getFinalAuthentication();
+		byte[] finalAuthentication = encrypter.getFinalAuthentication();
 		if (LOG.isLoggable(Level.FINE)) {
 			LOG.fine("finalAuthentication=" + Arrays.toString(finalAuthentication) + " at pos="
 					+ zipOS.getWritten());
@@ -277,8 +283,8 @@ public class AesZipFileEncrypter {
 	/**
 	 * Zip + encrypt one "inFile" to one "outZipFile" using "password".
 	 */
-	public static void zipAndEncrypt(File inFile, File outFile, String password) throws IOException {
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
+	public static void zipAndEncrypt(File inFile, File outFile, String password, AESEncrypter encrypter) throws IOException {
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile,encrypter);
 		try {
 			enc.add(inFile, password);
 		} finally {
@@ -291,8 +297,8 @@ public class AesZipFileEncrypter {
 	/**
 	 * Encrypt all files from an existing zip to one new "zipOutFile" using "password".
 	 */
-	public static void zipAndEncryptAll(File inZipFile, File outFile, String password) throws IOException {
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile);
+	public static void zipAndEncryptAll(File inZipFile, File outFile, String password, AESEncrypter encrypter) throws IOException {
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(outFile,encrypter);
 		try {
 			enc.addAll(inZipFile, password);
 		} finally {
