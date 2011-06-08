@@ -42,7 +42,8 @@ public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
 	 * Setup AES encryption based on pwBytes using WinZipAES approach
 	 * with SALT and pwVerification bytes based on password+salt.
 	 */
-	public AESEncrypterBC( byte[] pwBytes ) throws ZipException {
+	public void init( String pwStr, int keySize ) throws ZipException {
+		byte[] pwBytes = pwStr.getBytes();
 		PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
 		this.saltBytes = createSalt();
 		generator.init( pwBytes, saltBytes, ITERATION_COUNT );

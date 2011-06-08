@@ -21,7 +21,7 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 	@Test
 	public void testWithOutputStream() throws IOException {
 		OutputStream bao = new ByteArrayOutputStream();
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(bao);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(bao,encrypter);
 		enc.add("jpgSmall.jpg",getInFileAsStream("jpgSmall.jpg"), PASSWORD);
 		enc.add("textMedium.txt",getInFileAsStream("textMedium.txt"), PASSWORD);
 		enc.close();
@@ -31,13 +31,13 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 	public void testVariousFileTypesWithStream() throws Exception {
 		String zipFileName = "tmpZipFile.zip";
 		File zipFile = getOutFile(zipFileName);
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile,encrypter);
 		
 		enc.add("jpgSmall.jpg",getInFileAsStream("jpgSmall.jpg"), PASSWORD);
 		enc.add("textMedium.txt",getInFileAsStream("textMedium.txt"), PASSWORD);
 		enc.close();
 		
-		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile,decrypter);
 		File outFile = getOutFile("jpgSmall.jpg");
 		dec.extractEntryWithTmpFile(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
 		outFile = getOutFile("textMedium.txt");
@@ -49,14 +49,14 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 	public void testVariousFileTypes() throws Exception {
 		String zipFileName = "tmpZipFile.zip";
 		File zipFile = getOutFile(zipFileName);
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile,encrypter);
 		enc.add(getInFile("jpgSmall.jpg"),"jpgSmall.jpg", PASSWORD);
 		enc.add(getInFile("textMedium.txt"),"textMedium.txt", PASSWORD);
 		File inFileTextLong = getInFile("textLong.txt"); 
 		enc.add(inFileTextLong, PASSWORD);
 		enc.close();
 		
-		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile,decrypter);
 		File outFile = getOutFile("jpgSmall.jpg");
 		dec.extractEntryWithTmpFile(dec.getEntry("jpgSmall.jpg"), outFile, PASSWORD);
 		outFile = getOutFile("textMedium.txt");
@@ -85,12 +85,12 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 
 		String password = "123456";
 		File aesFile = getOutFile("aesFile.zip");
-		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile);
+		AesZipFileEncrypter aesEncryptor = new AesZipFileEncrypter(aesFile,encrypter);
 		aesEncryptor.addAll(tmpZipFile, password);
 		aesEncryptor.close();
 		tmpZipFile.delete();
 
-		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile);
+		AesZipFileDecrypter aesDecrypter = new AesZipFileDecrypter(aesFile,decrypter);
 		
 		checkZipEntry( aesDecrypter, fileName1, fileContent1, password );
 		checkZipEntry( aesDecrypter, fileName2, fileContent2, password );
@@ -105,14 +105,14 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 	@Test
 	public void testZipFileWithComment() throws Exception {
 		File zipFile = getOutFile("zipFileWithComment.zip");
-		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile,encrypter);
 		File inFileTextLong = getInFile("textLong.txt");
 		enc.add(inFileTextLong, PASSWORD);
 		String comment = "some comment on this file";
 		enc.setComment(comment);
 		enc.close();
 
-		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile);
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile,decrypter);
 		ExtZipEntry entry = dec.getEntry(inFileTextLong.toString());
 		assertNotNull( entry );
 		assertEquals( comment, dec.getComment() );
