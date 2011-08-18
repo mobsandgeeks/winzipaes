@@ -125,6 +125,14 @@ public class ExtZipEntry extends ZipEntry {
 		return centralDirectoryEntry;
 	}
 
+	@Override
+	public void setSize(long size) {
+		if( size<0 ) {
+			size = (size & 0xffffffffL);
+		}
+		super.setSize(size);
+	}
+	
 	// --------------------------------------------------------------------------
 
 	/**
