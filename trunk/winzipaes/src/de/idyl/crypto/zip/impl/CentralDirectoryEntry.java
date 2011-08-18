@@ -131,9 +131,9 @@ public class CentralDirectoryEntry implements ZipConstants {
 			}
 		}
 
-		this.compressedSize = raFile.readInt( fileOffset + 20 );
+		this.compressedSize = (int)raFile.readLong( fileOffset + 20 );
 
-		this.uncompressedSize = raFile.readInt( fileOffset + 24 );
+		this.uncompressedSize = (int)raFile.readLong( fileOffset + 24 );
 
 	}
 	
