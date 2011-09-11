@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip;
+package de.idyl.winzipaes;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -12,9 +12,10 @@ import java.util.zip.ZipException;
 import org.junit.Test;
 import org.junit.runners.Suite.SuiteClasses;
 
-import de.idyl.crypto.zip.impl.AESDecrypter;
-import de.idyl.crypto.zip.impl.AESDecrypterBC;
-import de.idyl.crypto.zip.impl.ExtZipEntry;
+import de.idyl.winzipaes.AesZipFileDecrypter;
+import de.idyl.winzipaes.impl.AESDecrypter;
+import de.idyl.winzipaes.impl.AESDecrypterBC;
+import de.idyl.winzipaes.impl.ExtZipEntry;
 
 @SuiteClasses(TestAesZipFileDecrypter.class)
 public class TestAesZipFileDecrypter extends TestAesZipBase {

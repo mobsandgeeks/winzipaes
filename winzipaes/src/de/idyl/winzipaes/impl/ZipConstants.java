@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip.impl;
+package de.idyl.winzipaes.impl;
 
 /**
  * Copy&Paste of constants needed from java.util.ZipConstants

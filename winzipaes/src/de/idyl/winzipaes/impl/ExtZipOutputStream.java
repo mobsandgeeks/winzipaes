@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip.impl;
+package de.idyl.winzipaes.impl;
 
 import java.io.File;
 import java.io.FileOutputStream;

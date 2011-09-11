@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package de.idyl.crypto.zip.impl;
+package de.idyl.winzipaes.impl;
 
 import java.security.SecureRandom;
 import java.util.Random;

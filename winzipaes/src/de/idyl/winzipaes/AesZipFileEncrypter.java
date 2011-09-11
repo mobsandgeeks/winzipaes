@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip;
+package de.idyl.winzipaes;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,10 +18,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import de.idyl.crypto.zip.impl.AESEncrypter;
-import de.idyl.crypto.zip.impl.ExtZipEntry;
-import de.idyl.crypto.zip.impl.ExtZipOutputStream;
-import de.idyl.crypto.zip.impl.ZipFileEntryInputStream;
+import de.idyl.winzipaes.impl.AESEncrypter;
+import de.idyl.winzipaes.impl.ExtZipEntry;
+import de.idyl.winzipaes.impl.ExtZipOutputStream;
+import de.idyl.winzipaes.impl.ZipFileEntryInputStream;
 
 /**
  * Create ZIP archive containing AES-256 encrypted entries. <br>

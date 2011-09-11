@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip;
+package de.idyl.winzipaes;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,14 +19,14 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import de.idyl.crypto.zip.impl.AESDecrypter;
-import de.idyl.crypto.zip.impl.AESDecrypterBC;
-import de.idyl.crypto.zip.impl.ByteArrayHelper;
-import de.idyl.crypto.zip.impl.CentralDirectoryEntry;
-import de.idyl.crypto.zip.impl.ExtRandomAccessFile;
-import de.idyl.crypto.zip.impl.ExtZipEntry;
-import de.idyl.crypto.zip.impl.ExtZipOutputStream;
-import de.idyl.crypto.zip.impl.ZipConstants;
+import de.idyl.winzipaes.impl.AESDecrypter;
+import de.idyl.winzipaes.impl.AESDecrypterBC;
+import de.idyl.winzipaes.impl.ByteArrayHelper;
+import de.idyl.winzipaes.impl.CentralDirectoryEntry;
+import de.idyl.winzipaes.impl.ExtRandomAccessFile;
+import de.idyl.winzipaes.impl.ExtZipEntry;
+import de.idyl.winzipaes.impl.ExtZipOutputStream;
+import de.idyl.winzipaes.impl.ZipConstants;
 
 /**
  * List/Extract data from AES encrypted WinZip file (readOnly).

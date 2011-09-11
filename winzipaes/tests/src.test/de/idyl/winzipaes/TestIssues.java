@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip;
+package de.idyl.winzipaes;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -11,7 +11,9 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
-import de.idyl.crypto.zip.impl.ExtZipEntry;
+import de.idyl.winzipaes.AesZipFileDecrypter;
+import de.idyl.winzipaes.AesZipFileEncrypter;
+import de.idyl.winzipaes.impl.ExtZipEntry;
 
 public class TestIssues extends TestAesZipBase {
 

@@ -1,11 +1,11 @@
-package de.idyl.crypto.zip.impl;
+package de.idyl.winzipaes.impl;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipException;
 
-import de.idyl.crypto.zip.AesZipFileDecrypter;
+import de.idyl.winzipaes.AesZipFileDecrypter;
 
 /**
  * Wrapper for the central directory entry (CDE) of one file.
