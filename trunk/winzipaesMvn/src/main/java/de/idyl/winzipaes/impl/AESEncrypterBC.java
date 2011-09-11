@@ -1,5 +1,6 @@
 package de.idyl.winzipaes.impl;
 
+import java.security.SecureRandom;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +42,8 @@ public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
 	 * Setup AES encryption based on pwBytes using WinZipAES approach
 	 * with SALT and pwVerification bytes based on password+salt.
 	 */
-	public AESEncrypterBC( byte[] pwBytes ) throws ZipException {
+	public void init( String pwStr, int keySize ) throws ZipException {
+		byte[] pwBytes = pwStr.getBytes();
 		PBEParametersGenerator generator = new PKCS5S2ParametersGenerator();
 		this.saltBytes = createSalt();
 		generator.init( pwBytes, saltBytes, ITERATION_COUNT );
@@ -139,19 +141,14 @@ public class AESEncrypterBC extends AESCryptoBase implements AESEncrypter {
 
 	// --------------------------------------------------------------------------
 
+	private static final Random RANDOM = new SecureRandom();	
+	
 	/**
-	 * create 16 bytes salt by using each 4 bytes of 2 random 32 bit numbers
+	 * create 16 bytes salt by using SecureRandom instance
 	 */
 	protected static byte[] createSalt() {
 		byte[] salt = new byte[16];
-		for( int j=0; j<2; j++ ) {
-			Random rand = new Random();
-			int i = rand.nextInt();
-			salt[0+j*4] = (byte)(i>>24);
-			salt[1+j*4] = (byte)(i>>16);
-			salt[2+j*4] = (byte)(i>>8);
-			salt[3+j*4] = (byte)i;
-		}
+		RANDOM.nextBytes(salt);
 		return salt;
 	}
 
