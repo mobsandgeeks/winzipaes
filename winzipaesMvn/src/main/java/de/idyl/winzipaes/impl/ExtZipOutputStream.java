@@ -24,6 +24,8 @@ public class ExtZipOutputStream implements ZipConstants {
 		this.out = out;
 	}
 
+	protected String comment;
+	
 	protected OutputStream out;
 
 	/** number of bytes written to out */
@@ -152,21 +154,34 @@ public class ExtZipOutputStream implements ZipConstants {
 		writeInt(ENDSIG); // end of central dir signature 4 bytes
 
 		writeShort(0x00); // number of this disk 2 bytes
-		writeShort(0x00); // number of the disk with the start of the central
-							// directory 2 bytes
+		writeShort(0x00); // number of the disk with the start of the central directory 2 bytes
 
-		writeShort(entries.size()); // total number of entries in central
-									// directory on this disk 2 bytes
-		writeShort(entries.size()); // total number of entries in the central
-									// directory 2 bytes
+		writeShort(entries.size()); // total number of entries in central directory on this disk 2 bytes
+		writeShort(entries.size()); // total number of entries in the central directory 2 bytes
 
 		writeInt(centralDirectorySize); // size of the central directory 4 bytes
 
-		writeInt(dirOffset); // offset of start of central dir, with respect to
-								// starting disk 4 bytes
-		writeShort(0x00); // .ZIP file comment length 2 bytes
+		writeInt(dirOffset);	// offset of start of central dir, with respect to starting disk 4 bytes
+		
+		byte[] commentBytes = this.comment!=null ? this.comment.getBytes() : new byte[0];		
+		writeShort(commentBytes.length); // .ZIP file comment length 2 bytes
+		if( commentBytes.length>0 ) {
+			writeBytes(commentBytes);
+		}
 
 		out.close();
+	}
+	
+	public void close() throws IOException {
+		out.close();
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 }

@@ -131,9 +131,9 @@ public class CentralDirectoryEntry implements ZipConstants {
 			}
 		}
 
-		this.compressedSize = raFile.readInt( fileOffset + 20 );
+		this.compressedSize = (int)raFile.readLong( fileOffset + 20 );
 
-		this.uncompressedSize = raFile.readInt( fileOffset + 24 );
+		this.uncompressedSize = (int)raFile.readLong( fileOffset + 24 );
 
 	}
 	
@@ -227,7 +227,7 @@ public class CentralDirectoryEntry implements ZipConstants {
 			sb.append( "offset\t\t\t = ").append( this.getOffset() ).append('\n');
 			//sb.append().append().append('\n');
 		} catch( IOException ioEx ) {
-			ioEx.printStackTrace();
+			LOG.log(Level.WARNING, ioEx.getMessage(), ioEx); 
 		}
 		return sb.toString();
 	}

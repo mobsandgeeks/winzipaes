@@ -1,18 +1,23 @@
 package de.idyl.winzipaes;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.CRC32;
 import java.util.zip.DataFormatException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import de.idyl.winzipaes.impl.AESDecrypter;
 import de.idyl.winzipaes.impl.AESDecrypterBC;
@@ -32,6 +37,7 @@ import de.idyl.winzipaes.impl.ZipConstants;
  * @see http://www.winzip.com/aes_info.htm
  *
  * @author olaf@merkert.de
+ * @author jos.v.roosmalen@gmail.com
  */
 public class AesZipFileDecrypter implements ZipConstants {
 
@@ -39,12 +45,16 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 	// --------------------------------------------------------------------------
 
-	/** charset to use for filename(s) and password - defaults to iso-8859-1 */
+	/** charset to use for filename(s) - defaults to iso-8859-1 */
 	public static String charset = "iso-8859-1";
 
 	/** size of buffer to use for byte[] operations - defaults to 1024 */
 	protected static int bufferSize = 1024 * 10;
 
+	// --------------------------------------------------------------------------
+
+	protected AESDecrypter decrypter;
+	
 	// --------------------------------------------------------------------------
 
 	/** random access file to access the archive data */
@@ -57,8 +67,9 @@ public class AesZipFileDecrypter implements ZipConstants {
 	
 	protected String comment;
 	
-	public AesZipFileDecrypter( File zipFile ) throws IOException {
+	public AesZipFileDecrypter( File zipFile, AESDecrypter decrypter ) throws IOException {
 		this.zipFile = zipFile;
+		this.decrypter = decrypter;
 		this.raFile = new ExtRandomAccessFile( zipFile );
 		initDirOffsetPosAndComment();
 	}
@@ -154,46 +165,57 @@ public class AesZipFileDecrypter implements ZipConstants {
 		return null;
 	}
 
-	public void extractEntry( ExtZipEntry zipEntry, File outFile, String password ) throws IOException, ZipException, DataFormatException {
+	protected void checkZipEntry(ExtZipEntry zipEntry) throws ZipException {
 		if( zipEntry==null ) {
 			throw new ZipException("zipEntry must NOT be NULL");
 		}
 		if( zipEntry.isDirectory() ) {
 			throw new ZipException("directory entries cannot be decrypted");
 		}
-		if( zipEntry.isEncrypted() ) {
-			byte[] pwBytes = password.getBytes(charset);
-			
-			CentralDirectoryEntry cde = zipEntry.getCentralDirectoryEntry();
-			if( !cde.isAesEncrypted() ) {
-				throw new ZipException("only AES encrypted files are supported");
-			}
-			
-			int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
-			
-			byte[] salt = raFile.readByteArray( cryptoHeaderOffset, 16 );
-			byte[] pwVerification = raFile.readByteArray( cryptoHeaderOffset+16, 2 );
+		if( !zipEntry.isEncrypted() ) {
+			throw new ZipException( "currently only extracts encrypted files - use java.util.zip to unzip" );
+		}
+	}
+	
+	public void extractEntryWithTmpFile( ExtZipEntry zipEntry, File outFile, String password ) throws IOException, ZipException, DataFormatException {
+		checkZipEntry(zipEntry);
 
-			if( LOG.isLoggable(Level.FINEST) ) {
-				LOG.finest( "\n" + cde.toString() );
-				LOG.finest( "offset    = " + zipEntry.getOffset() );
-				LOG.finest( "cryptoOff = " + cryptoHeaderOffset );
-				LOG.finest( "pwBytes   = " + ByteArrayHelper.toString(pwBytes) + " - " + pwBytes.length );
-				LOG.finest( "salt      = " + ByteArrayHelper.toString(salt) + " - " + salt.length );
-				LOG.finest( "pwVerif   = " + ByteArrayHelper.toString(pwVerification) + " - " + pwVerification.length );
-			}
-			
-			// encrypter throws ZipException for wrong password
-			AESDecrypter decrypter = new AESDecrypterBC( pwBytes, salt, pwVerification );
+		CentralDirectoryEntry cde = zipEntry.getCentralDirectoryEntry();
+		if( !cde.isAesEncrypted() ) {
+			throw new ZipException("only AES encrypted files are supported");
+		}
+		
+		int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
+		
+		byte[] salt = raFile.readByteArray( cryptoHeaderOffset, 16 );
+		byte[] pwVerification = raFile.readByteArray( cryptoHeaderOffset+16, 2 );
 
-			// create tmp file that contains the decrypted, but still compressed data
-			File tmpFile = new File( outFile.getPath() + "_TMP.zip" );
-			makeDir( new File(tmpFile.getParent()) );
-			ExtZipOutputStream zos = new ExtZipOutputStream( tmpFile );
+		if( LOG.isLoggable(Level.FINEST) ) {
+			LOG.finest( "\n" + cde.toString() );
+			LOG.finest( "offset    = " + zipEntry.getOffset() );
+			LOG.finest( "cryptoOff = " + cryptoHeaderOffset );
+			LOG.finest( "password  = " + password + " - " + password.length() );
+			LOG.finest( "salt      = " + ByteArrayHelper.toString(salt) + " - " + salt.length );
+			LOG.finest( "pwVerif   = " + ByteArrayHelper.toString(pwVerification) + " - " + pwVerification.length );
+		}
+		
+		// encrypter throws ZipException for wrong password
+		decrypter.init( password, 256, salt, pwVerification );
+
+		// create tmp file that contains the decrypted, but still compressed data
+		File tmpFile = new File( outFile.getPath() + "_TMP.zip" );
+		makeDir( new File(tmpFile.getParent()) );
+		
+		ExtZipOutputStream zos = null;
+		ZipFile zf = null;
+		FileOutputStream fos = null;
+		InputStream is = null;		
+		try {
+			zos = new ExtZipOutputStream( tmpFile );
 			ExtZipEntry tmpEntry = new ExtZipEntry( zipEntry );
 			tmpEntry.setPrimaryCompressionMethod( zipEntry.getMethod() );
 			zos.putNextEntry( tmpEntry );
-
+	
 			raFile.seek( cde.getOffset() );
 			byte[] buffer = new byte[bufferSize];
 			int remaining = (int)zipEntry.getEncryptedDataSize();
@@ -205,7 +227,8 @@ public class AesZipFileDecrypter implements ZipConstants {
 				remaining -= len;
 			}
 			zos.finish();
-
+			zos = null;
+	
 			byte[] storedMac = new byte[10];
 			raFile.readByteArray(storedMac,10);
 			byte[] calcMac = decrypter.getFinalAuthentication();
@@ -216,24 +239,32 @@ public class AesZipFileDecrypter implements ZipConstants {
 			if( !Arrays.equals(storedMac, calcMac ) ) {
 				throw new ZipException("stored authentication (mac) value does not match calculated one");
 			}
-
-			ZipFile zf = new ZipFile( tmpFile );
+	
+			zf = new ZipFile( tmpFile );
 			ZipEntry ze = zf.entries().nextElement();
-			InputStream is = zf.getInputStream( ze );
-			FileOutputStream fos = new FileOutputStream ( outFile.getPath() );
+			is = zf.getInputStream( ze );
+			fos = new FileOutputStream ( outFile.getPath() );
 			int read = is.read( buffer );
 			while( read>0 ) {
 				fos.write( buffer, 0, read );
 				read = is.read( buffer );
 			}
-			fos.close();
-			is.close();
-			zf.close();
-
-			tmpFile.delete();
-		} else {
-			throw new ZipException( "currently only extracts encrypted files - use java.util.zip to unzip" );
+		} finally {
+			if (zos != null) {
+				zos.close();
+			}
+			if (zf != null) {
+				zf.close();
+			}
+			if (fos != null) {
+				fos.close();
+			}
+			if (is != null) {
+				is.close();
+			}
 		}
+
+		tmpFile.delete();
 	}
 
 	/** number of entries in file (files AND directories) */
@@ -262,12 +293,122 @@ public class AesZipFileDecrypter implements ZipConstants {
 	
 	// --------------------------------------------------------------------------
 
+	/**
+	 * extract zipEntry - uses in-memory, so your file (stream contents) should not be too big 
+	 */
+	public void extractEntry(ExtZipEntry zipEntry, OutputStream outStream, String password)
+			throws IOException, ZipException, DataFormatException {
+		checkZipEntry(zipEntry);
+
+		ZipInputStream zipInputStream = null;
+		ByteArrayOutputStream bos = null;
+		try {
+			CentralDirectoryEntry cde = zipEntry.getCentralDirectoryEntry();
+			if (!cde.isAesEncrypted()) {
+				throw new ZipException("only AES encrypted files are supported");
+			}
+			int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
+			byte[] salt = raFile.readByteArray(cryptoHeaderOffset, 16);
+			byte[] pwVerification = raFile.readByteArray(cryptoHeaderOffset + 16, 2);
+			if (LOG.isLoggable(Level.FINEST)) {
+				LOG.finest("\n" + cde.toString());
+				LOG.finest("offset    = " + zipEntry.getOffset());
+				LOG.finest("cryptoOff = " + cryptoHeaderOffset);
+				LOG.finest("password  = " + password + " - " + password.length());
+				LOG.finest("salt      = " + ByteArrayHelper.toString(salt) + " - " + salt.length);
+				LOG.finest("pwVerif   = " + ByteArrayHelper.toString(pwVerification) + " - "
+						+ pwVerification.length);
+			}
+			// encrypter throws ZipException for wrong password
+			decrypter.init(password, 256, salt, pwVerification);
+
+			bos = new ByteArrayOutputStream(bufferSize);
+			ExtZipOutputStream zos = new ExtZipOutputStream(bos);
+			ExtZipEntry tmpEntry = new ExtZipEntry(zipEntry);
+			tmpEntry.setPrimaryCompressionMethod(zipEntry.getMethod());
+			tmpEntry.setCompressedSize(zipEntry.getEncryptedDataSize());
+			zos.putNextEntry(tmpEntry);
+			raFile.seek(cde.getOffset());
+			byte[] buffer = new byte[bufferSize];
+			int remaining = (int) zipEntry.getEncryptedDataSize();
+			while (remaining > 0) {
+				int len = (remaining > buffer.length) ? buffer.length : remaining;
+				int read = raFile.readByteArray(buffer, len);
+				decrypter.decrypt(buffer, read);
+				zos.writeBytes(buffer, 0, read);
+				remaining -= len;
+			}
+			zos.finish();
+			byte[] storedMac = new byte[10];
+			raFile.readByteArray(storedMac, 10);
+			byte[] calcMac = decrypter.getFinalAuthentication();
+			if (LOG.isLoggable(Level.FINE)) {
+				LOG.fine("storedMac=" + Arrays.toString(storedMac));
+				LOG.fine("calcMac=" + Arrays.toString(calcMac));
+			}
+			if (!Arrays.equals(storedMac, calcMac)) {
+				throw new ZipException("stored authentication (mac) value does not match calculated one");
+			}
+			zipInputStream = new ZipInputStream(new ByteArrayInputStream(bos.toByteArray()));
+			ZipEntry entry = zipInputStream.getNextEntry();
+			if( entry.getSize()!=0 ) {
+				int read = zipInputStream.read(buffer);
+				// at the end of the entry read-cycle a CRC check is performed.
+				// because our entry doesn't have a CRC this will result in an Exception
+				// we solve this by updating a CRC and pass this to the Entry.
+				CRC32 crc32 = new CRC32();
+				while (read > 0) {
+					outStream.write(buffer, 0, read);
+					crc32.update(buffer, 0, read);
+					entry.setCrc(crc32.getValue());
+					read = zipInputStream.read(buffer);
+				}
+			}
+		} finally {
+			if (bos != null) {
+				bos.close();
+			}
+			if (zipInputStream != null) {
+				zipInputStream.close();
+			}
+// not opened here, so we don't close it here
+//			if (outStream != null) {
+//				outStream.close();
+//			}
+		}
+	}
+
+	/**
+	 * extract zipEntry - uses in-memory, so your file should not be too big 
+	 */
+	public void extractEntry(ExtZipEntry zipEntry, File outFile, String password) throws IOException,
+			ZipException, DataFormatException {
+		ByteArrayOutputStream bos = null;
+		FileOutputStream fos = null;
+		try {
+			bos = new ByteArrayOutputStream(bufferSize);
+			fos = new FileOutputStream(outFile);
+			extractEntry(zipEntry, bos, password);
+			byte[] buffer = bos.toByteArray();
+			fos.write(buffer);
+		} finally {
+			if (bos != null) {
+				bos.close();
+			}
+			if (fos != null) {
+				fos.close();
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------
+
   /** testcode + usage example */
 	public static void main( String[] args ) throws Exception {
   	//LogManager.getLogManager().readConfiguration( new FileInputStream("logging.properties") );
-		AesZipFileDecrypter zipFile = new AesZipFileDecrypter( new File("doc/zipSpecificationAes.zip") );
+		AesZipFileDecrypter zipFile = new AesZipFileDecrypter( new File("doc/zipSpecificationAes.zip"), new AESDecrypterBC() );
 		ExtZipEntry entry = zipFile.getEntry( "zipSpecification.txt" );
-		zipFile.extractEntry( entry, new File("doc/zipSpecification.txt"), "foo" );
+		zipFile.extractEntryWithTmpFile( entry, new File("doc/zipSpecification.txt"), "foo" );
 	}
 
 }
