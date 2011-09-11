@@ -1,8 +1,8 @@
-package de.idyl.crypto.zip.impl;
+package de.idyl.winzipaes.impl;
 
-import static de.idyl.crypto.zip.impl.ByteArrayHelper.toInt;
-import static de.idyl.crypto.zip.impl.ByteArrayHelper.toLong;
-import static de.idyl.crypto.zip.impl.ByteArrayHelper.toShort;
+import static de.idyl.winzipaes.impl.ByteArrayHelper.toInt;
+import static de.idyl.winzipaes.impl.ByteArrayHelper.toLong;
+import static de.idyl.winzipaes.impl.ByteArrayHelper.toShort;
 
 import java.io.File;
 import java.io.IOException;

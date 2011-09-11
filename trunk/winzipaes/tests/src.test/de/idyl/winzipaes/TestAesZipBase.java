@@ -1,4 +1,4 @@
-package de.idyl.crypto.zip;
+package de.idyl.winzipaes;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,11 +17,12 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.Before;
 
-import de.idyl.crypto.zip.impl.AESDecrypter;
-import de.idyl.crypto.zip.impl.AESDecrypterBC;
-import de.idyl.crypto.zip.impl.AESEncrypter;
-import de.idyl.crypto.zip.impl.AESEncrypterBC;
-import de.idyl.crypto.zip.impl.ExtZipEntry;
+import de.idyl.winzipaes.AesZipFileDecrypter;
+import de.idyl.winzipaes.impl.AESDecrypter;
+import de.idyl.winzipaes.impl.AESDecrypterBC;
+import de.idyl.winzipaes.impl.AESEncrypter;
+import de.idyl.winzipaes.impl.AESEncrypterBC;
+import de.idyl.winzipaes.impl.ExtZipEntry;
 
 public class TestAesZipBase {
 

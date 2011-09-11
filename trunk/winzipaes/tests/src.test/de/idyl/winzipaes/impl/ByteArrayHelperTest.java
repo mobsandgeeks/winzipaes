@@ -1,8 +1,10 @@
-package de.idyl.crypto.zip.impl;
+package de.idyl.winzipaes.impl;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import de.idyl.winzipaes.impl.ByteArrayHelper;
 
 public class ByteArrayHelperTest {
 
