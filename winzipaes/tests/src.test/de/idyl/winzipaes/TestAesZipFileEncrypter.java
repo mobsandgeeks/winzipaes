@@ -2,7 +2,9 @@ package de.idyl.winzipaes;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,8 +15,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
-import de.idyl.winzipaes.AesZipFileDecrypter;
-import de.idyl.winzipaes.AesZipFileEncrypter;
 import de.idyl.winzipaes.impl.ExtZipEntry;
 
 
@@ -118,6 +118,21 @@ public class TestAesZipFileEncrypter extends TestAesZipBase {
 		ExtZipEntry entry = dec.getEntry(inFileTextLong.toString());
 		assertNotNull( entry );
 		assertEquals( comment, dec.getComment() );
+	}
+	
+	@Test
+	public void testAddEmptyFolder() throws Exception {
+		String folderName = "emptyFolder/";
+		String zipFileName = "tmpZipFile.zip";
+		File zipFile = getOutFile(zipFileName);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile,encrypter);
+		enc.add(folderName, new ByteArrayInputStream(new byte[0]), PASSWORD);
+		enc.close();
+		
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile,decrypter);
+		ExtZipEntry entry = dec.getEntry(folderName);
+		assertNotNull( entry );
+		assertTrue( entry.isDirectory() );
 	}
 	
 }
