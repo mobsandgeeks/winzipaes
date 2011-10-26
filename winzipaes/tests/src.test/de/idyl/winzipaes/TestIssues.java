@@ -11,8 +11,6 @@ import java.util.zip.ZipOutputStream;
 
 import org.junit.Test;
 
-import de.idyl.winzipaes.AesZipFileDecrypter;
-import de.idyl.winzipaes.AesZipFileEncrypter;
 import de.idyl.winzipaes.impl.ExtZipEntry;
 
 public class TestIssues extends TestAesZipBase {
@@ -94,5 +92,23 @@ public class TestIssues extends TestAesZipBase {
 		
 		aesDecrypter.close();
 	}
-	
+
+	@Test
+	public void testIssue38() throws Exception {
+		String zipFileName = "issue38.zip";
+		File zipFile = getOutFile(zipFileName);
+		AesZipFileEncrypter enc = new AesZipFileEncrypter(zipFile,encrypter);
+		
+		enc.add("jpgLarge.jpg",getInFileAsStream("jpgLarge.jpg"), PASSWORD);
+		enc.add("jpgLarge2.jpg",getInFileAsStream("jpgLarge.jpg"), PASSWORD);
+		enc.close();
+		
+		AesZipFileDecrypter dec = new AesZipFileDecrypter(zipFile,decrypter);
+		File outFile = getOutFile("jpgLarge.jpg");
+		dec.extractEntryWithTmpFile(dec.getEntry("jpgLarge.jpg"), outFile, PASSWORD);
+		outFile = getOutFile("jpgLarge2.jpg");
+		dec.extractEntryWithTmpFile(dec.getEntry("jpgLarge2.jpg"), outFile, PASSWORD);
+		dec.close();
+	}
+
 }
