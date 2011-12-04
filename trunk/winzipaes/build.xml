@@ -7,7 +7,7 @@
 		</tstamp>
 		<zip
 	  	destfile="winzipaes_src_${TODAY}.zip"
-	  	basedir="C:/data/projects/winzipaes"
+	  	basedir="G:/data/projects/winzipaes"
 	  	includes="src/**/*, src.test/**/*"
 	  	excludes="**/.svn/*"/>
 	</target>
