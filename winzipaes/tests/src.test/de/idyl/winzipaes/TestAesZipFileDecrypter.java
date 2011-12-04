@@ -12,7 +12,6 @@ import java.util.zip.ZipException;
 import org.junit.Test;
 import org.junit.runners.Suite.SuiteClasses;
 
-import de.idyl.winzipaes.AesZipFileDecrypter;
 import de.idyl.winzipaes.impl.AESDecrypter;
 import de.idyl.winzipaes.impl.AESDecrypterBC;
 import de.idyl.winzipaes.impl.ExtZipEntry;
@@ -156,4 +155,13 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 		aesDecryptor.extractEntryWithTmpFile( list.get(0), getOutFile("Test_ENDSIG"), password );		
 	}
 	
+  /** usage example */
+	public static void decryptFile( String[] args ) throws Exception {
+  	//LogManager.getLogManager().readConfiguration( new FileInputStream("logging.properties") );
+		AesZipFileDecrypter zipFile = new AesZipFileDecrypter( new File("doc/zipSpecificationAes.zip"), new AESDecrypterBC() );
+		ExtZipEntry entry = zipFile.getEntry( "zipSpecification.txt" );
+		zipFile.extractEntryWithTmpFile( entry, new File("doc/zipSpecification.txt"), "foo" );
+	}
+
+
 }
