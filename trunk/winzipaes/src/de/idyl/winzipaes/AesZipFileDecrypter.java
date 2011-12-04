@@ -20,7 +20,6 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import de.idyl.winzipaes.impl.AESDecrypter;
-import de.idyl.winzipaes.impl.AESDecrypterBC;
 import de.idyl.winzipaes.impl.ByteArrayHelper;
 import de.idyl.winzipaes.impl.CentralDirectoryEntry;
 import de.idyl.winzipaes.impl.ExtRandomAccessFile;
@@ -399,16 +398,6 @@ public class AesZipFileDecrypter implements ZipConstants {
 				fos.close();
 			}
 		}
-	}
-
-	// --------------------------------------------------------------------------
-
-  /** testcode + usage example */
-	public static void main( String[] args ) throws Exception {
-  	//LogManager.getLogManager().readConfiguration( new FileInputStream("logging.properties") );
-		AesZipFileDecrypter zipFile = new AesZipFileDecrypter( new File("doc/zipSpecificationAes.zip"), new AESDecrypterBC() );
-		ExtZipEntry entry = zipFile.getEntry( "zipSpecification.txt" );
-		zipFile.extractEntryWithTmpFile( entry, new File("doc/zipSpecification.txt"), "foo" );
 	}
 
 }
