@@ -169,7 +169,8 @@ public class AesZipFileEncrypter {
 	 * Add un-encrypted + un-zipped InputStream contents as file "name" to encrypted zip file.
 	 * 
 	 * @param name of the new zipEntry within the zip file
-	 * @param is provides the data to be added  
+	 * @param is provides the data to be added. It is left open and should be closed by the caller 
+	 * 				(it is safe to do so immediately after the call).
 	 * @param password to be used for encryption
 	 */
 	public void add(String name, InputStream is, String password) throws IOException,	UnsupportedEncodingException {
