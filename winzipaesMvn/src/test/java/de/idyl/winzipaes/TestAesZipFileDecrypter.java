@@ -117,7 +117,6 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 
 	@Test(expected=ZipException.class)
 	public void testWithUnEncryptedEntriesExExpected() throws Exception, ZipException {		
-		//activateLog();
 		String password = "foobar";
 		File aesFile = getInZipFile("mixed.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile,DECRYPTER);
@@ -127,7 +126,6 @@ public class TestAesZipFileDecrypter extends TestAesZipBase {
 	
 	@Test
 	public void testWithSubdirs() throws Exception {		
-		activateLog();
 		String password = "foobar";
 		File aesFile = getInZipFile("subdir.zip");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile,DECRYPTER);
