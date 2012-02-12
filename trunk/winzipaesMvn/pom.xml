@@ -13,6 +13,7 @@
 
 	<developers>
 		<developer>
+			<id>olaf.merkert</id>
 			<name>Olaf Merkert</name>
 			<email>olaf@merkert.de</email>
 		</developer>
@@ -21,7 +22,6 @@
 	<scm>
 		<connection>scm:svn:https://winzipaes.googlecode.com/svn/trunk/winzipaesMvn</connection>
 		<developerConnection>scm:svn:https://winzipaes.googlecode.com/svn/trunk/winzipaesMvn</developerConnection>
-		<tag>HEAD</tag>
 		<url>http://code.google.com/p/winzipaes/</url>
 	</scm>
 
@@ -76,6 +76,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
 				<executions>
 					<execution>
 						<id>attach-sources</id>
@@ -130,5 +131,11 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
 
 </project>
