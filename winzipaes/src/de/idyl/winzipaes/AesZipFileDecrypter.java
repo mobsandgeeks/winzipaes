@@ -308,15 +308,14 @@ public class AesZipFileDecrypter implements ZipConstants {
 			}
 			int cryptoHeaderOffset = zipEntry.getOffset() - cde.getCryptoHeaderLength();
 			byte[] salt = raFile.readByteArray(cryptoHeaderOffset, 16);
-			byte[] pwVerification = raFile.readByteArray(cryptoHeaderOffset + 16, 2);
+			byte[] pwVerification = raFile.readByteArray(cryptoHeaderOffset + 16, 2);			
 			if (LOG.isLoggable(Level.FINEST)) {
 				LOG.finest("\n" + cde.toString());
 				LOG.finest("offset    = " + zipEntry.getOffset());
 				LOG.finest("cryptoOff = " + cryptoHeaderOffset);
 				LOG.finest("password  = " + password + " - " + password.length());
 				LOG.finest("salt      = " + ByteArrayHelper.toString(salt) + " - " + salt.length);
-				LOG.finest("pwVerif   = " + ByteArrayHelper.toString(pwVerification) + " - "
-						+ pwVerification.length);
+				LOG.finest("pwVerif   = " + ByteArrayHelper.toString(pwVerification) + " - " + pwVerification.length);
 			}
 			// encrypter throws ZipException for wrong password
 			decrypter.init(password, 256, salt, pwVerification);
@@ -329,6 +328,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 			zos.putNextEntry(tmpEntry);
 			raFile.seek(cde.getOffset());
 			byte[] buffer = new byte[bufferSize];
+			CRC32 crc32 = new CRC32();
 			int remaining = (int) zipEntry.getEncryptedDataSize();
 			while (remaining > 0) {
 				int len = (remaining > buffer.length) ? buffer.length : remaining;
@@ -336,7 +336,9 @@ public class AesZipFileDecrypter implements ZipConstants {
 				decrypter.decrypt(buffer, read);
 				zos.writeBytes(buffer, 0, read);
 				remaining -= len;
+				crc32.update(buffer, 0, read);
 			}
+			tmpEntry.setCrc(crc32.getValue());
 			zos.finish();
 			byte[] storedMac = new byte[10];
 			raFile.readByteArray(storedMac, 10);
@@ -348,14 +350,16 @@ public class AesZipFileDecrypter implements ZipConstants {
 			if (!Arrays.equals(storedMac, calcMac)) {
 				throw new ZipException("stored authentication (mac) value does not match calculated one");
 			}
+
 			zipInputStream = new ZipInputStream(new ByteArrayInputStream(bos.toByteArray()));
 			ZipEntry entry = zipInputStream.getNextEntry();
+			// At the end of the entry read-cycle a CRC check is performed.
+			// Because our entry doesn't have a CRC this will result in an Exception
+			// we solve this by updating a CRC and pass this to the entry.
+			entry.setCrc( crc32.getValue() );
 			if( entry.getSize()!=0 ) {
+				crc32 = new CRC32();
 				int read = zipInputStream.read(buffer);
-				// at the end of the entry read-cycle a CRC check is performed.
-				// because our entry doesn't have a CRC this will result in an Exception
-				// we solve this by updating a CRC and pass this to the Entry.
-				CRC32 crc32 = new CRC32();
 				while (read > 0) {
 					outStream.write(buffer, 0, read);
 					crc32.update(buffer, 0, read);
@@ -363,6 +367,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 					read = zipInputStream.read(buffer);
 				}
 			}
+
 		} finally {
 			if (bos != null) {
 				bos.close();
