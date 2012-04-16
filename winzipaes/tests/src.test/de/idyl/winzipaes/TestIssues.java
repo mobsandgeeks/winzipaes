@@ -122,4 +122,13 @@ public class TestIssues extends TestAesZipBase {
 		//aesDecryptor.extractEntryWithTmpFile( list.get(0), getOutFile("problem.txt"), password );		
 	}
 
+	@Test
+	public void testIssue43() throws Exception {
+		File aesFile = getInZipFile("1winzipEncryptedFile.zip");
+		String password = "123456";
+		File outFile = new File("foo.txt");
+		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile,new AESDecrypterBC());
+		aesDecryptor.extractEntryWithTmpFile(aesDecryptor.getEntry("foo.txt"), outFile, password);		
+	}
+	
 }

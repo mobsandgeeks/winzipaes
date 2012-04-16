@@ -203,7 +203,7 @@ public class AesZipFileDecrypter implements ZipConstants {
 
 		// create tmp file that contains the decrypted, but still compressed data
 		File tmpFile = new File( outFile.getPath() + "_TMP.zip" );
-		makeDir( new File(tmpFile.getParent()) );
+		makeDir( tmpFile.getParent() );
 		
 		ExtZipOutputStream zos = null;
 		ZipFile zf = null;
@@ -269,6 +269,12 @@ public class AesZipFileDecrypter implements ZipConstants {
 	/** number of entries in file (files AND directories) */
 	public short getNumberOfEntries() throws IOException {
 		return raFile.readShort( this.dirOffsetPos-6 );
+	}
+
+	protected static void makeDir(String dirStr) {
+		if(dirStr!=null) {
+			makeDir(new File(dirStr));
+		}
 	}
 
 	protected static void makeDir(File dir) {
