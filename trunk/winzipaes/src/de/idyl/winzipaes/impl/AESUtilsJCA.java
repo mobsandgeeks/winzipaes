@@ -76,17 +76,17 @@ public class AESUtilsJCA {
 			 * XXX(mdempsky): Could happen if the user's JRE doesn't support PBKDF2,
 			 * AES, and/or HMAC-SHA1.  Throw a better exception?
 			 */
-			throw new Error();
+			throw new TypeNotPresentException(e.getMessage(), e);
 		} catch (InvalidKeyException e) {
 			e.printStackTrace();
 			/* Shouldn't happen: our key specs match our algorithms. */
-			throw new Error();
+			throw new TypeNotPresentException(e.getMessage(), e);
 		} catch (InvalidKeySpecException e) {
 			/* Shouldn't happen: our key specs match our algorithms. */
-			throw new Error();
+			throw new TypeNotPresentException(e.getMessage(), e);
 		} catch (NoSuchPaddingException e) {
 			/* Shouldn't happen: we don't specify any padding schemes. */
-			throw new Error();
+			throw new TypeNotPresentException(e.getMessage(), e);
 		}
 	}
 

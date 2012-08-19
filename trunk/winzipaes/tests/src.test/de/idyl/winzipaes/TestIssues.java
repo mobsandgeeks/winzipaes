@@ -3,8 +3,14 @@ package de.idyl.winzipaes;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.zip.Deflater;
 import java.util.zip.ZipOutputStream;
@@ -12,6 +18,7 @@ import java.util.zip.ZipOutputStream;
 import org.junit.Test;
 
 import de.idyl.winzipaes.impl.AESDecrypterBC;
+import de.idyl.winzipaes.impl.AESEncrypterJCA;
 import de.idyl.winzipaes.impl.ExtZipEntry;
 
 public class TestIssues extends TestAesZipBase {
@@ -129,6 +136,20 @@ public class TestIssues extends TestAesZipBase {
 		File outFile = new File("foo.txt");
 		AesZipFileDecrypter aesDecryptor = new AesZipFileDecrypter(aesFile,new AESDecrypterBC());
 		aesDecryptor.extractEntryWithTmpFile(aesDecryptor.getEntry("foo.txt"), outFile, password);		
+	}
+	
+	@Test(expected=TypeNotPresentException.class)
+	public void testIssue45() throws UnsupportedEncodingException, IOException {
+		// int size = 1024 * 1024 * 1024; // 1GiB
+		int size = 1024 * 1024; // 1MiB
+		ByteBuffer bb = ByteBuffer.allocate(size);
+		OutputStream out = System.out;
+		InputStream in = new ByteArrayInputStream(bb.array());
+		AesZipFileEncrypter encrypter = new AesZipFileEncrypter(out, new AESEncrypterJCA());
+		encrypter.add("test.txt", in, "password");
+		encrypter.close();
+		out.flush();
+		out.close();
 	}
 	
 }
