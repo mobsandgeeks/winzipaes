@@ -74,23 +74,29 @@ public class AesZipFileDecrypter implements ZipConstants {
 	}
 
 	protected void initDirOffsetPosAndComment() throws IOException {
-		// zip files without a comment contain the offset/position of the central directory at this fixed position
-		this.dirOffsetPos = zipFile.length() - 6;
-		final int dirOffset = raFile.readInt( this.dirOffsetPos - 16 );
-		if( dirOffset!=ENDSIG ) {
-			// if a comment is present, search the ENDSIG constant, starting at the end of the zip file
-			byte[] endsig = ByteArrayHelper.toByteArray((int)ZipConstants.ENDSIG);
-			long endsigPos = raFile.lastPosOf(endsig);
-			if( endsigPos==-1 ) {
-				throw new ZipException("expected ENDSIC not found (marks the beginning of the central directory at end of the zip file)");
-			} else {
-				this.dirOffsetPos = endsigPos+16;
-				short commentLength = raFile.readShort( this.dirOffsetPos + 4 );
-				this.comment = new String( raFile.readByteArray( this.dirOffsetPos+6, commentLength ) );
-			}
-		}		
+		try {
+			// zip files without a comment contain the offset/position of the central directory at this fixed position
+			this.dirOffsetPos = zipFile.length() - 6;
+			final int dirOffset = raFile.readInt( this.dirOffsetPos - 16 );
+			if( dirOffset!=ENDSIG ) {
+				// if a comment is present, search the ENDSIG constant, starting at the end of the zip file
+				byte[] endsig = ByteArrayHelper.toByteArray((int)ZipConstants.ENDSIG);
+				long endsigPos = raFile.lastPosOf(endsig);
+				if( endsigPos==-1 ) {
+					throw new ZipException("expected ENDSIC not found (marks the beginning of the central directory at end of the zip file)");
+				} else {
+					this.dirOffsetPos = endsigPos+16;
+					short commentLength = raFile.readShort( this.dirOffsetPos + 4 );
+					this.comment = new String( raFile.readByteArray( this.dirOffsetPos+6, commentLength ) );
+				}
+			}		
+		} catch(IOException ioEx) {
+			this.raFile.close();	// ex thrown in constructor, so client has no handle to close()
+			throw ioEx;
+		}
 	}
 
+	/** client is required to call this method when no more files need to be extracted */ 
 	public void close() throws IOException {
 		raFile.close();
 	}
@@ -381,10 +387,8 @@ public class AesZipFileDecrypter implements ZipConstants {
 			if (zipInputStream != null) {
 				zipInputStream.close();
 			}
-// not opened here, so we don't close it here
-//			if (outStream != null) {
-//				outStream.close();
-//			}
+			// not opened here, so we don't close it here
+			// if (outStream != null) outStream.close();
 		}
 	}
 
