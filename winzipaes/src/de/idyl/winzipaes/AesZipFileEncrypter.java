@@ -45,6 +45,10 @@ public class AesZipFileEncrypter {
 	// --------------------------------------------------------------------------
 
 	protected ExtZipOutputStream zipOS;
+	
+	// --------------------------------------------------------------------------
+	
+	protected boolean enableUTF8;
 
 	/**
 	 * 
@@ -54,6 +58,7 @@ public class AesZipFileEncrypter {
 	public AesZipFileEncrypter(String pathName, AESEncrypter encrypter) throws IOException {
 		zipOS = new ExtZipOutputStream(new File(pathName));
 		this.encrypter = encrypter;
+		this.enableUTF8 = false;
 	}
 
 	/**
@@ -64,11 +69,13 @@ public class AesZipFileEncrypter {
 	public AesZipFileEncrypter(File outFile, AESEncrypter encrypter) throws IOException {
 		zipOS = new ExtZipOutputStream(outFile);
 		this.encrypter = encrypter;
+		this.enableUTF8 = false;
 	}
 
 	public AesZipFileEncrypter(OutputStream outFile, AESEncrypter encrypter) throws IOException {
 		zipOS = new ExtZipOutputStream(outFile);
 		this.encrypter = encrypter;
+		this.enableUTF8 = false;
 	}
 
 	// --------------------------------------------------------------------------
@@ -110,7 +117,7 @@ public class AesZipFileEncrypter {
 		entry.setSize(zipEntry.getSize());
 		entry.setCompressedSize(zipEntry.getCompressedSize() + 28);
 		entry.setTime(zipEntry.getTime());
-		entry.initEncryptedEntry();
+		entry.initEncryptedEntry(enableUTF8);
 
 		zipOS.putNextEntry(entry);
 		// ZIP-file data contains: 1. salt 2. pwVerification 3. encryptedContent 4. authenticationCode
@@ -195,7 +202,7 @@ public class AesZipFileEncrypter {
 		entry.setSize(inputLen);
 		entry.setCompressedSize(data.length + 28);
 		entry.setTime((new java.util.Date()).getTime());
-		entry.initEncryptedEntry();
+		entry.initEncryptedEntry(enableUTF8);
 
 		zipOS.putNextEntry(entry);
 		// ZIP-file data contains: 1. salt 2. pwVerification 3. encryptedContent 4. authenticationCode
@@ -306,5 +313,10 @@ public class AesZipFileEncrypter {
 			enc.close();
 		}
 	}
-
+	
+	public void enableUTF8()
+	{
+		enableUTF8 = true;
+		zipOS.enableUTF8();
+	}
 }
