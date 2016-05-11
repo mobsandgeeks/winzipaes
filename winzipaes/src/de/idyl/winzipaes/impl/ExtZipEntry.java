@@ -35,10 +35,16 @@ public class ExtZipEntry extends ZipEntry {
 	}
 	
 	public void initEncryptedEntry() {
+		initEncryptedEntry(false);
+	}
+	
+	public void initEncryptedEntry(boolean enableUTF8) {
 		setCrc(0); // CRC-32 / for encrypted files it's 0 as AES/MAC checks integritiy
 
 		this.flag |= 1; // bit0 - encrypted
 		// flag |= 8; // bit3 - use data descriptor
+		if(enableUTF8)
+			this.flag |= 1 << 11;
 
 		this.primaryCompressionMethod = 0x63;
 

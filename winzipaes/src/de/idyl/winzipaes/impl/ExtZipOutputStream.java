@@ -18,10 +18,12 @@ public class ExtZipOutputStream implements ZipConstants {
 
 	public ExtZipOutputStream(File file) throws IOException {
 		out = new FileOutputStream(file);
+		encoding = "iso-8859-1";
 	}
 
 	public ExtZipOutputStream(OutputStream out) {
 		this.out = out;
+		encoding = "iso-8859-1";
 	}
 
 	protected String comment;
@@ -30,6 +32,8 @@ public class ExtZipOutputStream implements ZipConstants {
 
 	/** number of bytes written to out */
 	protected int written;
+	
+	protected String encoding;
 
 	public int getWritten() {
 		return this.written;
@@ -85,7 +89,7 @@ public class ExtZipOutputStream implements ZipConstants {
 		writeInt((int) entry.getCompressedSize()); // compressed size
 		writeInt((int) entry.getSize()); // uncompressed size
 
-		writeShort(entry.getName().length()); // file name length
+		writeShort(entry.getName().getBytes(encoding).length); // file name length
 		if (entry.getExtra() != null) {
 			writeShort(entry.getExtra().length); // extra field length
 		} else {
@@ -108,7 +112,7 @@ public class ExtZipOutputStream implements ZipConstants {
 
 		writeInt(entry.getOffset()); // relative offset of local header 4 bytes
 
-		writeBytes(entry.getName().getBytes("iso-8859-1"));
+		writeBytes(entry.getName().getBytes(encoding));
 
 		writeExtraBytes(entry);
 	}
@@ -131,7 +135,7 @@ public class ExtZipOutputStream implements ZipConstants {
 		writeInt(LOCSIG);
 
 		writeFileInfo(entry);
-		writeBytes(entry.getName().getBytes("iso-8859-1"));
+		writeBytes(entry.getName().getBytes(encoding));
 		writeExtraBytes(entry);
 	}
 
@@ -182,6 +186,11 @@ public class ExtZipOutputStream implements ZipConstants {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+	
+	public void enableUTF8()
+	{
+		this.encoding = "UTF8";
 	}
 
 }
